@@ -308,27 +308,222 @@ class ProfilePage extends StatelessWidget {
     final title = _getWorkoutTitle(goal);
     final description = _getWorkoutDescription(goal);
 
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.fitness_center_rounded, color: Colors.blueAccent, size: 20),
+                const SizedBox(width: 8),
+                const Text("Тренировочный план", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => _showYodaEcosystemSheet(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _limeAccent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _limeAccent.withValues(alpha: 0.4)),
+                    ),
+                    child: const Text(
+                      "Подробнее",
+                      style: TextStyle(color: _limeAccent, fontSize: 12, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(description, style: const TextStyle(color: _textGrey, fontSize: 13)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showYodaEcosystemSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
+        ),
+        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(ctx).padding.bottom + 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 28),
+            // Заголовок
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFFD4FF45), Color(0xFF8FD400)]),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.rocket_launch_rounded, color: Colors.black, size: 22),
+                ),
+                const SizedBox(width: 14),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Экосистема Yoda", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+                    Text("Следующий уровень тренировок", style: TextStyle(color: _textGrey, fontSize: 13)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+
+            // Карточка Yoda Run
+            _buildEcoCard(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1A2A1A), Color(0xFF0F1F0F)],
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
+              ),
+              borderColor: _limeAccent.withValues(alpha: 0.3),
+              icon: Icons.directions_run_rounded,
+              iconColor: _limeAccent,
+              badge: "APP",
+              badgeColor: _limeAccent,
+              title: "Yoda Run",
+              subtitle: "Умный бег с ИИ-тренером",
+              features: const ["GPS-трекинг маршрутов", "ИИ строит план бега", "Анализ темпа и пульса"],
+              buttonLabel: "Скачать бесплатно",
+              buttonColor: _limeAccent,
+              buttonTextColor: Colors.black,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Карточка Yoda Band
+            _buildEcoCard(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1A1A2E), Color(0xFF0F0F1F)],
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
+              ),
+              borderColor: const Color(0xFF4A7DFF).withValues(alpha: 0.4),
+              icon: Icons.watch_rounded,
+              iconColor: const Color(0xFF4A7DFF),
+              badge: "NEW",
+              badgeColor: const Color(0xFF4A7DFF),
+              title: "Yoda Band",
+              subtitle: "Умный браслет нового поколения",
+              features: const ["Мониторинг восстановления 24/7", "HRV, SpO₂, стресс-индекс", "Интеграция с Yoda Health"],
+              buttonLabel: "Узнать больше",
+              buttonColor: const Color(0xFF4A7DFF),
+              buttonTextColor: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEcoCard({
+    required Gradient gradient,
+    required Color borderColor,
+    required IconData icon,
+    required Color iconColor,
+    required String badge,
+    required Color badgeColor,
+    required String title,
+    required String subtitle,
+    required List<String> features,
+    required String buttonLabel,
+    required Color buttonColor,
+    required Color buttonTextColor,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardColor,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: borderColor, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.fitness_center_rounded, color: Colors.blueAccent, size: 20),
-              const SizedBox(width: 8),
-              const Text("Тренировочный план", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: iconColor, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: badgeColor,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(badge, style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w900)),
+                        ),
+                      ],
+                    ),
+                    Text(subtitle, style: TextStyle(color: iconColor.withValues(alpha: 0.8), fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(description, style: const TextStyle(color: _textGrey, fontSize: 13)),
+          const SizedBox(height: 16),
+          ...features.map((f) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: iconColor, size: 16),
+                const SizedBox(width: 10),
+                Text(f, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          )),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                foregroundColor: buttonTextColor,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+            ),
+          ),
         ],
       ),
     );
