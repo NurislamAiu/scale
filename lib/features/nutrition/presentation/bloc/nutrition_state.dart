@@ -1,5 +1,7 @@
 part of 'nutrition_bloc.dart';
 
+enum MealType { breakfast, lunch, dinner }
+
 class NutritionState extends Equatable {
   final int targetCalories;
   final int consumedCalories;
@@ -64,18 +66,28 @@ class NutritionState extends Equatable {
 }
 
 class Meal extends Equatable {
+  final String id;
   final String title;
   final int calories;
+  final int protein;
+  final int fat;
+  final int carbs;
   final String imageUrl;
   final DateTime timestamp;
+  final MealType type;
 
   const Meal({
+    required this.id,
     required this.title,
     required this.calories,
+    required this.protein,
+    required this.fat,
+    required this.carbs,
     required this.imageUrl,
     required this.timestamp,
+    required this.type,
   });
 
   @override
-  List<Object?> get props => [title, calories, imageUrl, timestamp];
+  List<Object?> get props => [id, title, calories, protein, fat, carbs, imageUrl, timestamp, type];
 }

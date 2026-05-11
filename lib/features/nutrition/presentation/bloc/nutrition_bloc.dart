@@ -19,6 +19,8 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
     required this.scaleBloc,
   }) : super(const NutritionState()) {
     on<NutritionDataUpdated>(_onDataUpdated);
+    on<NutritionMealAdded>(_onMealAdded);
+    on<NutritionMealDeleted>(_onMealDeleted);
 
     _profileSubscription = profileBloc.stream.listen((profileState) {
       add(NutritionDataUpdated(
@@ -97,37 +99,63 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
     int fatTarget = (weight * 0.9).round();
     int carbsTarget = ((targetCalories - (proteinTarget * 4) - (fatTarget * 9)) / 4).round();
 
-    // Mock consumed data for demo
-    const consumedCalories = 760;
-    const proteinConsumed = 65;
-    const fatConsumed = 42;
-    const carbsConsumed = 180;
-
-    final mockMeals = [
-      Meal(
-        title: 'Завтрак',
-        calories: 450,
-        imageUrl: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500&auto=format&fit=crop',
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      Meal(
-        title: 'Обед',
-        calories: 310,
-        imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop',
-        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-    ];
-
     emit(state.copyWith(
       targetCalories: targetCalories,
-      consumedCalories: consumedCalories,
       proteinTarget: proteinTarget,
-      proteinConsumed: proteinConsumed,
       fatTarget: fatTarget,
-      fatConsumed: fatConsumed,
       carbsTarget: carbsTarget,
-      carbsConsumed: carbsConsumed,
-      meals: mockMeals,
+    ));
+  }
+
+  void _onMealAdded(NutritionMealAdded event, Emitter<NutritionState> emit) {
+    String imageUrl;
+    switch (event.type) {
+      case MealType.breakfast:
+        imageUrl = 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500&auto=format&fit=crop';
+        break;
+      case MealType.lunch:
+        imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop';
+        break;
+      case MealType.dinner:
+        imageUrl = 'https://images.unsplash.com/photo-1559813631-155977a99300?q=80&w=500&auto=format&fit=crop';
+        break;
+    }
+
+    final newMeal = Meal(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: event.title,
+      calories: event.calories,
+      protein: event.protein,
+      fat: event.fat,
+      carbs: event.carbs,
+      imageUrl: imageUrl,
+      timestamp: DateTime.now(),
+      type: event.type,
+    );
+
+    final updatedMeals = List<Meal>.from(state.meals)..add(newMeal);
+
+    emit(state.copyWith(
+      consumedCalories: state.consumedCalories + event.calories,
+      proteinConsumed: state.proteinConsumed + event.protein,
+      fatConsumed: state.fatConsumed + event.fat,
+      carbsConsumed: state.carbsConsumed + event.carbs,
+      meals: updatedMeals,
+    ));
+  }
+
+  void _onMealDeleted(NutritionMealDeleted event, Emitter<NutritionState> emit) {
+    final mealToDelete = state.meals.where((m) => m.id == event.mealId).firstOrNull;
+    if (mealToDelete == null) return;
+
+    final updatedMeals = state.meals.where((m) => m.id != event.mealId).toList();
+
+    emit(state.copyWith(
+      consumedCalories: state.consumedCalories - mealToDelete.calories,
+      proteinConsumed: state.proteinConsumed - mealToDelete.protein,
+      fatConsumed: state.fatConsumed - mealToDelete.fat,
+      carbsConsumed: state.carbsConsumed - mealToDelete.carbs,
+      meals: updatedMeals,
     ));
   }
 
