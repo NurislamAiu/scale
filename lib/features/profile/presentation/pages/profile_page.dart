@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -357,175 +358,238 @@ class ProfilePage extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: _cardColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
-        ),
-        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(ctx).padding.bottom + 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2)),
-            ),
-            const SizedBox(height: 28),
-            // Заголовок
-            Row(
+      builder: (ctx) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF0E0E10),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
+          ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(0, 16, 0, MediaQuery.of(ctx).padding.bottom + 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // Drag handle
                 Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFD4FF45), Color(0xFF8FD400)]),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.rocket_launch_rounded, color: Colors.black, size: 22),
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(2)),
                 ),
-                const SizedBox(width: 14),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Экосистема Yoda", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
-                    Text("Следующий уровень тренировок", style: TextStyle(color: _textGrey, fontSize: 13)),
-                  ],
+                const SizedBox(height: 24),
+
+                // Бейдж NEW
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _limeAccent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: _limeAccent.withValues(alpha: 0.35)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.bolt_rounded, color: _limeAccent, size: 14),
+                      SizedBox(width: 4),
+                      Text("ТОЛЬКО ЧТО ВЫШЕЛ", style: TextStyle(color: _limeAccent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Заголовок
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    "Yoda Band",
+                    style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    "Первый браслет, который знает тебя лучше, чем ты сам",
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 15, height: 1.4),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
+                // SVG браслет
+                SizedBox(
+                  width: double.infinity,
+                  height: 200,
+                  child: CustomPaint(painter: _YodaBandPainter()),
+                ),
+
+                const SizedBox(height: 36),
+
+                // Метрики
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      _buildMetricChip("HRV", "Восстановление"),
+                      const SizedBox(width: 10),
+                      _buildMetricChip("SpO₂", "Кислород крови"),
+                      const SizedBox(width: 10),
+                      _buildMetricChip("24/7", "Мониторинг"),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Фичи — воронка
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      _buildBandFeature(
+                        Icons.favorite_rounded,
+                        const Color(0xFFFF5C7A),
+                        "Умное восстановление",
+                        "Анализирует сон, стресс и нагрузку — говорит, когда тренироваться, а когда отдохнуть",
+                      ),
+                      const SizedBox(height: 16),
+                      _buildBandFeature(
+                        Icons.bolt_rounded,
+                        _limeAccent,
+                        "ИИ-тренер на запястье",
+                        "Синхронизируется с Yoda Health и даёт персональные рекомендации в реальном времени",
+                      ),
+                      const SizedBox(height: 16),
+                      _buildBandFeature(
+                        Icons.nights_stay_rounded,
+                        const Color(0xFF9B8FFF),
+                        "Анализ сна как у pro-спортсменов",
+                        "REM, глубокий сон, микро-пробуждения — точность медицинского уровня",
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Социальное доказательство
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (_) => const Icon(Icons.star_rounded, color: _limeAccent, size: 18)),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          '"После Yoda Band я понял, почему всегда уставал на тренировках — я просто не восстанавливался"',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontStyle: FontStyle.italic, height: 1.5),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text("— Алексей, 31 год · марафонец", style: TextStyle(color: _textGrey, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // CTA кнопки
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _limeAccent,
+                            foregroundColor: Colors.black,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("ХОЧУ YODA BAND", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.3)),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward_rounded, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("Пока не сейчас", style: TextStyle(color: _textGrey, fontSize: 13)),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 28),
+          ),
+        );
+      },
+    );
+  }
 
-            // Карточка Yoda Run
-            _buildEcoCard(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1A2A1A), Color(0xFF0F1F0F)],
-                begin: Alignment.topLeft, end: Alignment.bottomRight,
-              ),
-              borderColor: _limeAccent.withValues(alpha: 0.3),
-              icon: Icons.directions_run_rounded,
-              iconColor: _limeAccent,
-              badge: "APP",
-              badgeColor: _limeAccent,
-              title: "Yoda Run",
-              subtitle: "Умный бег с ИИ-тренером",
-              features: const ["GPS-трекинг маршрутов", "ИИ строит план бега", "Анализ темпа и пульса"],
-              buttonLabel: "Скачать бесплатно",
-              buttonColor: _limeAccent,
-              buttonTextColor: Colors.black,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Карточка Yoda Band
-            _buildEcoCard(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1A1A2E), Color(0xFF0F0F1F)],
-                begin: Alignment.topLeft, end: Alignment.bottomRight,
-              ),
-              borderColor: const Color(0xFF4A7DFF).withValues(alpha: 0.4),
-              icon: Icons.watch_rounded,
-              iconColor: const Color(0xFF4A7DFF),
-              badge: "NEW",
-              badgeColor: const Color(0xFF4A7DFF),
-              title: "Yoda Band",
-              subtitle: "Умный браслет нового поколения",
-              features: const ["Мониторинг восстановления 24/7", "HRV, SpO₂, стресс-индекс", "Интеграция с Yoda Health"],
-              buttonLabel: "Узнать больше",
-              buttonColor: const Color(0xFF4A7DFF),
-              buttonTextColor: Colors.white,
-            ),
+  Widget _buildMetricChip(String value, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _limeAccent.withValues(alpha: 0.15)),
+        ),
+        child: Column(
+          children: [
+            Text(value, style: const TextStyle(color: _limeAccent, fontSize: 17, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(color: _textGrey, fontSize: 10, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEcoCard({
-    required Gradient gradient,
-    required Color borderColor,
-    required IconData icon,
-    required Color iconColor,
-    required String badge,
-    required Color badgeColor,
-    required String title,
-    required String subtitle,
-    required List<String> features,
-    required String buttonLabel,
-    required Color buttonColor,
-    required Color buttonTextColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildBandFeature(IconData icon, Color color, String title, String desc) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: iconColor, size: 26),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: badgeColor,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(badge, style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w900)),
-                        ),
-                      ],
-                    ),
-                    Text(subtitle, style: TextStyle(color: iconColor.withValues(alpha: 0.8), fontSize: 12, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
+              Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(desc, style: const TextStyle(color: _textGrey, fontSize: 13, height: 1.4)),
             ],
           ),
-          const SizedBox(height: 16),
-          ...features.map((f) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle_rounded, color: iconColor, size: 16),
-                const SizedBox(width: 10),
-                Text(f, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          )),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: buttonColor,
-                foregroundColor: buttonTextColor,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -830,4 +894,169 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _YodaBandPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+
+    // --- Ремешок нижний ---
+    final strapPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [const Color(0xFF2A2A2E), const Color(0xFF1A1A1E)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(cx - 28, cy + 36, 56, 60));
+    final strapTop = RRect.fromRectAndRadius(
+      Rect.fromLTWH(cx - 28, cy + 34, 56, 62),
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(strapTop, strapPaint);
+
+    // --- Ремешок верхний ---
+    final strapPaint2 = Paint()
+      ..shader = LinearGradient(
+        colors: [const Color(0xFF2A2A2E), const Color(0xFF1A1A1E)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ).createShader(Rect.fromLTWH(cx - 28, cy - 96, 56, 62));
+    final strapBottom = RRect.fromRectAndRadius(
+      Rect.fromLTWH(cx - 28, cy - 96, 56, 62),
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(strapBottom, strapPaint2);
+
+    // Дырочки на ремешке
+    final holePaint = Paint()..color = const Color(0xFF0E0E10);
+    for (int i = 0; i < 3; i++) {
+      canvas.drawCircle(Offset(cx, cy + 55 + i * 16.0), 3, holePaint);
+      canvas.drawCircle(Offset(cx, cy - 71 - i * 16.0), 3, holePaint);
+    }
+
+    // --- Корпус ---
+    final bodyPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [const Color(0xFF2E2E33), const Color(0xFF1C1C20)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Rect.fromLTWH(cx - 46, cy - 38, 92, 76));
+    final body = RRect.fromRectAndRadius(
+      Rect.fromLTWH(cx - 46, cy - 38, 92, 76),
+      const Radius.circular(20),
+    );
+    canvas.drawRRect(body, bodyPaint);
+
+    // Граница корпуса
+    final borderPaint = Paint()
+      ..color = const Color(0xFFD4FF45).withOpacity(0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawRRect(body, borderPaint);
+
+    // --- Экран ---
+    final screenPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [const Color(0xFF0A1A0A), const Color(0xFF0D1510)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Rect.fromLTWH(cx - 36, cy - 28, 72, 56));
+    final screen = RRect.fromRectAndRadius(
+      Rect.fromLTWH(cx - 36, cy - 28, 72, 56),
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(screen, screenPaint);
+
+    // --- Контент экрана ---
+
+    // Пульс линия (ECG-стиль)
+    final ecgPaint = Paint()
+      ..color = const Color(0xFFD4FF45)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final ecgPath = Path();
+    ecgPath.moveTo(cx - 32, cy - 2);
+    ecgPath.lineTo(cx - 20, cy - 2);
+    ecgPath.lineTo(cx - 14, cy - 14);
+    ecgPath.lineTo(cx - 8, cy + 10);
+    ecgPath.lineTo(cx - 2, cy - 18);
+    ecgPath.lineTo(cx + 4, cy + 6);
+    ecgPath.lineTo(cx + 10, cy - 2);
+    ecgPath.lineTo(cx + 32, cy - 2);
+    canvas.drawPath(ecgPath, ecgPaint);
+
+    // HRV текст (маленький)
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: "HRV  82",
+        style: TextStyle(color: Color(0xFFD4FF45), fontSize: 9, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(cx - 36 + 4, cy - 26));
+
+    // Нижние метрики
+    final metricPainter = TextPainter(
+      text: const TextSpan(
+        children: [
+          TextSpan(text: "SpO₂ 98%  ", style: TextStyle(color: Color(0xFF9B8FFF), fontSize: 7.5, fontWeight: FontWeight.bold)),
+          TextSpan(text: "64 bpm", style: TextStyle(color: Color(0xFFFF5C7A), fontSize: 7.5, fontWeight: FontWeight.bold)),
+        ],
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    metricPainter.paint(canvas, Offset(cx - 36 + 4, cy + 16));
+
+    // --- Боковая кнопка ---
+    final btnPaint = Paint()
+      ..color = const Color(0xFF3A3A3E)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(cx + 46, cy - 10, 5, 20), const Radius.circular(3)),
+      btnPaint,
+    );
+
+    // --- Лаймовый свет снизу корпуса ---
+    final glowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [const Color(0xFFD4FF45).withOpacity(0.18), Colors.transparent],
+      ).createShader(Rect.fromCircle(center: Offset(cx, cy + 40), radius: 50));
+    canvas.drawCircle(Offset(cx, cy + 40), 50, glowPaint);
+
+    // --- Тень корпуса ---
+    final shadowPaint = Paint()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 16)
+      ..color = const Color(0xFFD4FF45).withOpacity(0.12);
+    canvas.drawRRect(body, shadowPaint);
+
+    // --- Орнамент ремешка (текстура) ---
+    final texturePaint = Paint()
+      ..color = Colors.white.withOpacity(0.04)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+    for (double y = cy + 40; y < cy + 90; y += 8) {
+      canvas.drawLine(Offset(cx - 26, y), Offset(cx + 26, y), texturePaint);
+    }
+    for (double y = cy - 42; y > cy - 90; y -= 8) {
+      canvas.drawLine(Offset(cx - 26, y), Offset(cx + 26, y), texturePaint);
+    }
+
+    // Точки-деления по кругу (декор)
+    final dotPaint = Paint()..color = const Color(0xFFD4FF45).withOpacity(0.3);
+    for (int i = 0; i < 12; i++) {
+      final angle = (i / 12) * 2 * math.pi;
+      final r = 90.0;
+      final dx = cx + r * math.cos(angle);
+      final dy = cy + r * math.sin(angle);
+      if (dy < cy - 36 || dy > cy + 36) continue;
+      canvas.drawCircle(Offset(dx, dy), 1.5, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
