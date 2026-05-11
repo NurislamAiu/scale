@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 
 const Color _bgColor = Color(0xFF141414);
@@ -20,7 +21,7 @@ class NutritionPage extends StatelessWidget {
           body: SafeArea(
             child: Column(
               children: [
-                _buildAppBar(),
+                _buildAppBar(context, state),
                 Expanded(
                   child: CustomScrollView(
                     physics: const BouncingScrollPhysics(),
@@ -57,25 +58,67 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(BuildContext context, NutritionState state) {
+    String dateTitle = "Питание";
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(state.selectedDate.year, state.selectedDate.month, state.selectedDate.day);
+
+    if (selected == today) {
+      dateTitle = "Сегодня";
+    } else if (selected == today.subtract(const Duration(days: 1))) {
+      dateTitle = "Вчера";
+    } else {
+      dateTitle = DateFormat('d MMMM', 'ru_RU').format(state.selectedDate);
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          const Text(
-            "Питание",
-            style: TextStyle(
-              color: _limeAccent,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                dateTitle,
+                style: const TextStyle(
+                  color: _limeAccent,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (selected != today)
+                const Text(
+                  "Просмотр истории",
+                  style: TextStyle(color: _textGrey, fontSize: 12),
+                ),
+            ],
           ),
           const Spacer(),
           IconButton(
-            icon: const Icon(Icons.calendar_today_outlined, color: _limeAccent, size: 20),
-            onPressed: () {},
+            icon: const Icon(Icons.calendar_today_outlined, color: _limeAccent, size: 22),
+            onPressed: () => _showProgressCalendar(context, state),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showProgressCalendar(BuildContext context, NutritionState state) {
+    final nutritionBloc = context.read<NutritionBloc>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => BlocProvider.value(
+        value: nutritionBloc,
+        child: _ProgressCalendarSheet(
+          initialDate: state.selectedDate,
+          historyProgress: state.historyProgress,
+          onDateSelected: (date) {
+            nutritionBloc.add(NutritionDateChanged(date));
+          },
+        ),
       ),
     );
   }
@@ -430,7 +473,7 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  void _showCalorieCalculator(BuildContext context, {MealType? initialType}) {
+  void _showCalorieCalculator(BuildContext context, {MealType? initialType, String? replaceMealId}) {
     final nutritionBloc = context.read<NutritionBloc>();
     showModalBottomSheet(
       context: context,
@@ -438,7 +481,7 @@ class NutritionPage extends StatelessWidget {
       isScrollControlled: true,
       builder: (context) => BlocProvider.value(
         value: nutritionBloc,
-        child: _CalorieCalculatorSheet(initialType: initialType),
+        child: _CalorieCalculatorSheet(initialType: initialType, replaceMealId: replaceMealId),
       ),
     );
   }
@@ -544,7 +587,7 @@ class NutritionPage extends StatelessWidget {
           confirmDismiss: (direction) async {
             if (direction == DismissDirection.endToStart) {
               // Edit action
-              _showCalorieCalculator(context, initialType: meal.type);
+              _showCalorieCalculator(context, initialType: meal.type, replaceMealId: meal.id);
               return false; // Don't dismiss the item
             }
             return true; // Dismiss for deletion
@@ -594,10 +637,7 @@ class NutritionPage extends StatelessWidget {
       height: 110,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        image: DecorationImage(
-          image: NetworkImage(imageUrl),
-          fit: BoxFit.cover,
-        ),
+        color: _cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -606,54 +646,72 @@ class NutritionPage extends StatelessWidget {
           )
         ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.black.withOpacity(0.85),
-            ],
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: const Color(0xFF2C2C2E),
+                  child: const Icon(Icons.restaurant_rounded, color: Colors.white10, size: 40),
+                );
+              },
+            ),
           ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          Positioned.fill(
+            child: Container(
               decoration: BoxDecoration(
-                color: _limeAccent.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _limeAccent.withOpacity(0.2)),
-              ),
-              child: Text(
-                calories,
-                style: const TextStyle(
-                  color: _limeAccent,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.85),
+                  ],
                 ),
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _limeAccent.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _limeAccent.withOpacity(0.2)),
+                    ),
+                    child: Text(
+                      calories,
+                      style: const TextStyle(
+                        color: _limeAccent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -857,10 +915,106 @@ class DottedBorderPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+class _ProgressCalendarSheet extends StatelessWidget {
+  final DateTime initialDate;
+  final Map<DateTime, double> historyProgress;
+  final Function(DateTime) onDateSelected;
+
+  const _ProgressCalendarSheet({
+    required this.initialDate,
+    required this.historyProgress,
+    required this.onDateSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: _bgColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              "Календарь прогресса",
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: Theme(
+              data: ThemeData.dark().copyWith(
+                colorScheme: const ColorScheme.dark(
+                  primary: _limeAccent,
+                  onPrimary: Colors.black,
+                  surface: _bgColor,
+                  onSurface: Colors.white,
+                ),
+                dialogBackgroundColor: _bgColor,
+              ),
+              child: CalendarDatePicker(
+                initialDate: initialDate,
+                firstDate: DateTime(2023),
+                lastDate: DateTime.now(),
+                onDateChanged: (date) {
+                  onDateSelected(date);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+          _buildLegend(),
+          const SizedBox(height: 48),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegend() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildLegendItem(Colors.greenAccent, "Норма соблюдена"),
+          const SizedBox(width: 24),
+          _buildLegendItem(Colors.redAccent, "Перебор ккал"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(color: _textGrey, fontSize: 12)),
+      ],
+    );
+  }
+}
+
 class _CalorieCalculatorSheet extends StatefulWidget {
   final MealType? initialType;
+  final String? replaceMealId;
 
-  const _CalorieCalculatorSheet({this.initialType});
+  const _CalorieCalculatorSheet({this.initialType, this.replaceMealId});
 
   @override
   State<_CalorieCalculatorSheet> createState() => _CalorieCalculatorSheetState();
@@ -924,6 +1078,7 @@ class _CalorieCalculatorSheetState extends State<_CalorieCalculatorSheet> {
       fat: (_selectedFood!['f'] * factor).round(),
       carbs: (_selectedFood!['c'] * factor).round(),
       type: _selectedType,
+      replaceMealId: widget.replaceMealId,
     ));
 
     Navigator.pop(context);

@@ -24,6 +24,7 @@ class NutritionMealAdded extends NutritionEvent {
   final int fat;
   final int carbs;
   final MealType type;
+  final String? replaceMealId;
 
   const NutritionMealAdded({
     required this.title,
@@ -32,10 +33,11 @@ class NutritionMealAdded extends NutritionEvent {
     required this.fat,
     required this.carbs,
     required this.type,
+    this.replaceMealId,
   });
 
   @override
-  List<Object?> get props => [title, calories, protein, fat, carbs, type];
+  List<Object?> get props => [title, calories, protein, fat, carbs, type, replaceMealId];
 }
 
 class NutritionMealDeleted extends NutritionEvent {
@@ -45,4 +47,13 @@ class NutritionMealDeleted extends NutritionEvent {
 
   @override
   List<Object?> get props => [mealId];
+}
+
+class NutritionDateChanged extends NutritionEvent {
+  final DateTime date;
+
+  const NutritionDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
 }

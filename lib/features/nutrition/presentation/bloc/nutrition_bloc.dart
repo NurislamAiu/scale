@@ -17,10 +17,11 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
   NutritionBloc({
     required this.profileBloc,
     required this.scaleBloc,
-  }) : super(const NutritionState()) {
+  }) : super(NutritionState(selectedDate: DateTime.now())) {
     on<NutritionDataUpdated>(_onDataUpdated);
     on<NutritionMealAdded>(_onMealAdded);
     on<NutritionMealDeleted>(_onMealDeleted);
+    on<NutritionDateChanged>(_onDateChanged);
 
     _profileSubscription = profileBloc.stream.listen((profileState) {
       add(NutritionDataUpdated(
@@ -104,10 +105,52 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
       proteinTarget: proteinTarget,
       fatTarget: fatTarget,
       carbsTarget: carbsTarget,
+      historyProgress: _generateMockHistory(),
+    ));
+  }
+
+  Map<DateTime, double> _generateMockHistory() {
+    final now = DateTime.now();
+    return {
+      DateTime(now.year, now.month, now.day - 1): 0.95, // Зеленый
+      DateTime(now.year, now.month, now.day - 2): 1.15, // Красный
+      DateTime(now.year, now.month, now.day - 3): 0.88, // Зеленый
+      DateTime(now.year, now.month, now.day - 4): 0.70, // Зеленый
+      DateTime(now.year, now.month, now.day - 5): 1.25, // Красный
+    };
+  }
+
+  void _onDateChanged(NutritionDateChanged event, Emitter<NutritionState> emit) {
+    // В реальном приложении здесь был бы запрос к БД за данными на эту дату
+    emit(state.copyWith(
+      selectedDate: event.date,
+      consumedCalories: 0,
+      proteinConsumed: 0,
+      fatConsumed: 0,
+      carbsConsumed: 0,
+      meals: [],
     ));
   }
 
   void _onMealAdded(NutritionMealAdded event, Emitter<NutritionState> emit) {
+    int consumedCalories = state.consumedCalories;
+    int proteinConsumed = state.proteinConsumed;
+    int fatConsumed = state.fatConsumed;
+    int carbsConsumed = state.carbsConsumed;
+    List<Meal> updatedMeals = List<Meal>.from(state.meals);
+
+    // If we are replacing an existing meal, remove it first
+    if (event.replaceMealId != null) {
+      final oldMeal = updatedMeals.where((m) => m.id == event.replaceMealId).firstOrNull;
+      if (oldMeal != null) {
+        consumedCalories -= oldMeal.calories;
+        proteinConsumed -= oldMeal.protein;
+        fatConsumed -= oldMeal.fat;
+        carbsConsumed -= oldMeal.carbs;
+        updatedMeals.removeWhere((m) => m.id == event.replaceMealId);
+      }
+    }
+
     String imageUrl;
     switch (event.type) {
       case MealType.breakfast:
@@ -117,7 +160,7 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
         imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop';
         break;
       case MealType.dinner:
-        imageUrl = 'https://images.unsplash.com/photo-1559813631-155977a99300?q=80&w=500&auto=format&fit=crop';
+        imageUrl = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=500&auto=format&fit=crop';
         break;
     }
 
@@ -133,13 +176,13 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
       type: event.type,
     );
 
-    final updatedMeals = List<Meal>.from(state.meals)..add(newMeal);
+    updatedMeals.add(newMeal);
 
     emit(state.copyWith(
-      consumedCalories: state.consumedCalories + event.calories,
-      proteinConsumed: state.proteinConsumed + event.protein,
-      fatConsumed: state.fatConsumed + event.fat,
-      carbsConsumed: state.carbsConsumed + event.carbs,
+      consumedCalories: consumedCalories + event.calories,
+      proteinConsumed: proteinConsumed + event.protein,
+      fatConsumed: fatConsumed + event.fat,
+      carbsConsumed: carbsConsumed + event.carbs,
       meals: updatedMeals,
     ));
   }

@@ -3,6 +3,8 @@ part of 'nutrition_bloc.dart';
 enum MealType { breakfast, lunch, dinner }
 
 class NutritionState extends Equatable {
+  final DateTime selectedDate;
+  final Map<DateTime, double> historyProgress; // Date -> consumed/target ratio
   final int targetCalories;
   final int consumedCalories;
   final int proteinTarget;
@@ -14,6 +16,8 @@ class NutritionState extends Equatable {
   final List<Meal> meals;
 
   const NutritionState({
+    required this.selectedDate,
+    this.historyProgress = const {},
     this.targetCalories = 2000,
     this.consumedCalories = 0,
     this.proteinTarget = 150,
@@ -28,6 +32,8 @@ class NutritionState extends Equatable {
   int get remainingCalories => targetCalories - consumedCalories;
 
   NutritionState copyWith({
+    DateTime? selectedDate,
+    Map<DateTime, double>? historyProgress,
     int? targetCalories,
     int? consumedCalories,
     int? proteinTarget,
@@ -39,6 +45,8 @@ class NutritionState extends Equatable {
     List<Meal>? meals,
   }) {
     return NutritionState(
+      selectedDate: selectedDate ?? this.selectedDate,
+      historyProgress: historyProgress ?? this.historyProgress,
       targetCalories: targetCalories ?? this.targetCalories,
       consumedCalories: consumedCalories ?? this.consumedCalories,
       proteinTarget: proteinTarget ?? this.proteinTarget,
@@ -53,6 +61,8 @@ class NutritionState extends Equatable {
 
   @override
   List<Object?> get props => [
+        selectedDate,
+        historyProgress,
         targetCalories,
         consumedCalories,
         proteinTarget,
