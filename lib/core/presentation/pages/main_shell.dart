@@ -39,7 +39,7 @@ class MainShell extends StatelessWidget {
           children: [
             _buildNavItem("Главная", Icons.grid_view_rounded, 0),
             _buildNavItem("Аналитика", Icons.bar_chart_rounded, 1),
-            _buildNavItem("Тренировки", Icons.fitness_center_rounded, 2),
+            _buildNavItem("Питание", Icons.restaurant_rounded, 2),
             _buildNavItem("Профиль", Icons.person_outline_rounded, 3),
           ],
         ),

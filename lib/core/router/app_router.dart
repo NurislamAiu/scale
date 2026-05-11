@@ -15,11 +15,8 @@ import 'package:smart_scale/features/reminders/presentation/bloc/reminders_bloc.
 import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
 import 'package:smart_scale/features/scale/presentation/pages/home_page.dart';
 import 'package:smart_scale/features/scale/presentation/pages/my_devices_page.dart';
-import 'package:smart_scale/features/workouts/presentation/pages/workouts_page.dart';
-import 'package:smart_scale/features/workouts/presentation/pages/workout_detail_page.dart';
-import 'package:smart_scale/features/workouts/presentation/pages/workout_execute_page.dart';
-import 'package:smart_scale/features/workouts/presentation/pages/workout_history_page.dart';
 import 'package:smart_scale/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:smart_scale/features/nutrition/presentation/pages/nutrition_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -114,39 +111,12 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch 2: Workouts
+            // Branch 2: Nutrition
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/workouts',
-                  builder: (context, state) => const WorkoutsPage(),
-                  routes: [
-                    GoRoute(
-                      path: 'detail/:programIndex',
-                      parentNavigatorKey: _rootNavigatorKey,
-                      builder: (context, state) {
-                        final index = state.pathParameters['programIndex'] ?? '0';
-                        return WorkoutDetailPage(programIndex: index);
-                      },
-                    ),
-                    GoRoute(
-                      path: 'execute/:programIndex/:dayIndex',
-                      parentNavigatorKey: _rootNavigatorKey,
-                      builder: (context, state) {
-                        final pIndex = state.pathParameters['programIndex'] ?? '0';
-                        final dIndex = state.pathParameters['dayIndex'] ?? '0';
-                        return WorkoutExecutePage(
-                          programIndex: pIndex,
-                          dayIndex: dIndex,
-                        );
-                      },
-                    ),
-                    GoRoute(
-                      path: 'history',
-                      parentNavigatorKey: _rootNavigatorKey,
-                      builder: (context, state) => const WorkoutHistoryPage(),
-                    ),
-                  ],
+                  path: '/nutrition',
+                  builder: (context, state) => const NutritionPage(),
                 ),
               ],
             ),
@@ -205,33 +175,6 @@ class _SplashPage extends StatelessWidget {
       backgroundColor: Color(0xFF141414),
       body: Center(
         child: CircularProgressIndicator(color: Color(0xFFD4FF45)),
-      ),
-    );
-  }
-}
-
-// Placeholder Page
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF141414),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Center(
-        child: Text(
-          "Раздел \"$title\" в разработке",
-          style: const TextStyle(color: Color(0xFFA0A0A5), fontSize: 16),
-        ),
       ),
     );
   }
