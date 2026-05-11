@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_scale/features/analytics/data/repositories/history_repository_impl.dart';
 import 'package:smart_scale/features/analytics/domain/repositories/history_repository.dart';
 import 'package:smart_scale/features/analytics/presentation/bloc/analytics_bloc.dart';
+import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 import 'package:smart_scale/features/profile/data/profile_repository_impl.dart';
 import 'package:smart_scale/features/profile/domain/repositories/profile_repository.dart';
 import 'package:smart_scale/features/profile/presentation/bloc/profile_bloc.dart';
@@ -54,5 +55,11 @@ Future<void> setupDi() async {
   );
   getIt.registerFactory<AnalyticsBloc>(
     () => AnalyticsBloc(getIt()),
+  );
+  getIt.registerFactory<NutritionBloc>(
+    () => NutritionBloc(
+      profileBloc: getIt<ProfileBloc>(),
+      scaleBloc: getIt<ScaleBloc>(),
+    ),
   );
 }

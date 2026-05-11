@@ -1,38 +1,44 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 
 class NutritionPage extends StatelessWidget {
   const NutritionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildMacros(),
-                  const SizedBox(height: 32),
-                  _buildAIAnalysis(),
-                  const SizedBox(height: 32),
-                  _buildMealList(),
-                  const SizedBox(height: 40),
-                ],
+    return BlocBuilder<NutritionBloc, NutritionState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildAppBar(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildHeader(state),
+                      const SizedBox(height: 32),
+                      _buildMacros(state),
+                      const SizedBox(height: 32),
+                      _buildAIAnalysis(state),
+                      const SizedBox(height: 32),
+                      _buildMealList(state),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -54,7 +60,20 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(NutritionState state) {
+    if (state.targetCalories == 0) {
+      return Container(
+        height: 240,
+        alignment: Alignment.center,
+        child: const Text(
+          'Взвесьтесь, чтобы рассчитать норму',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white70, fontSize: 16),
+        ),
+      );
+    }
+    final progress = state.targetCalories > 0 ? state.consumedCalories / state.targetCalories : 0.0;
+    
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -64,7 +83,7 @@ class NutritionPage extends StatelessWidget {
             height: 240,
             child: CustomPaint(
               painter: CalorieRingPainter(
-                progress: 0.38, // 760 / 2000
+                progress: progress.clamp(0.0, 1.0),
                 color: const Color(0xFFCCFF00),
               ),
             ),
@@ -79,10 +98,10 @@ class NutritionPage extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const Text(
-                '1,240',
+              Text(
+                '${state.remainingCalories.abs()}',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: state.remainingCalories >= 0 ? Colors.white : Colors.redAccent,
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -1,
@@ -90,19 +109,19 @@ class NutritionPage extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '760',
-                      style: TextStyle(
+                      text: '${state.consumedCalories}',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
                     TextSpan(
-                      text: ' / 2,000 ккал',
-                      style: TextStyle(
+                      text: ' / ${state.targetCalories} ккал',
+                      style: const TextStyle(
                         color: Color(0xFFA0A0A5),
                         fontSize: 14,
                       ),
@@ -117,14 +136,35 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMacros() {
+  Widget _buildMacros(NutritionState state) {
     return Row(
       children: [
-        Expanded(child: _buildMacroItem('Белки', '65г', 0.6, const Color(0xFFFF7B5C))),
+        Expanded(
+          child: _buildMacroItem(
+            'Белки',
+            '${state.proteinConsumed}г',
+            state.proteinTarget > 0 ? state.proteinConsumed / state.proteinTarget : 0,
+            const Color(0xFFFF7B5C),
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildMacroItem('Жиры', '42г', 0.4, const Color(0xFFFFD600))),
+        Expanded(
+          child: _buildMacroItem(
+            'Жиры',
+            '${state.fatConsumed}г',
+            state.fatTarget > 0 ? state.fatConsumed / state.fatTarget : 0,
+            const Color(0xFFFFD600),
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildMacroItem('Углеводы', '180г', 0.8, const Color(0xFF00E5FF))),
+        Expanded(
+          child: _buildMacroItem(
+            'Углеводы',
+            '${state.carbsConsumed}г',
+            state.carbsTarget > 0 ? state.carbsConsumed / state.carbsTarget : 0,
+            const Color(0xFF00E5FF),
+          ),
+        ),
       ],
     );
   }
@@ -150,7 +190,7 @@ class NutritionPage extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(2),
           child: LinearProgressIndicator(
-            value: progress,
+            value: progress.clamp(0.0, 1.0),
             backgroundColor: Colors.white.withOpacity(0.1),
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 4,
@@ -160,7 +200,19 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAIAnalysis() {
+  Widget _buildAIAnalysis(NutritionState state) {
+    // Basic AI feedback based on data
+    String analysis = 'Начните записывать приемы пищи, чтобы получить персональный анализ.';
+    if (state.consumedCalories > 0) {
+      if (state.proteinConsumed < (state.proteinTarget * 0.5)) {
+        analysis = 'Сегодня у вас дефицит белка. Попробуйте добавить в рацион творог, яйца или куриную грудку для лучшего восстановления.';
+      } else if (state.remainingCalories < 0) {
+        analysis = 'Вы превысили дневную норму калорий. Постарайтесь сегодня быть более активным, чтобы сбалансировать энергию.';
+      } else {
+        analysis = 'Ваш рацион сбалансирован. Продолжайте в том же духе, вы отлично придерживаетесь своего плана!';
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -186,7 +238,7 @@ class NutritionPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Вы потребляете на 15% больше белка, чем обычно. Это отлично скажется на восстановлении мышц после вчерашней тренировки.',
+                  analysis,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 14,
@@ -201,7 +253,7 @@ class NutritionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMealList() {
+  Widget _buildMealList(NutritionState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -214,19 +266,15 @@ class NutritionPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        _buildMealCard(
-          title: 'Завтрак',
-          calories: '450 ккал',
-          imageUrl: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500&auto=format&fit=crop',
-        ),
-        const SizedBox(height: 16),
-        _buildMealCard(
-          title: 'Обед',
-          calories: '720 ккал',
-          imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop',
-        ),
-        const SizedBox(height: 16),
-        _buildEmptyMealCard('Ужин'),
+        ...state.meals.map((meal) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _buildMealCard(
+                title: meal.title,
+                calories: '${meal.calories} ккал',
+                imageUrl: meal.imageUrl,
+              ),
+            )),
+        if (state.meals.length < 3) _buildEmptyMealCard('Ужин'),
       ],
     );
   }

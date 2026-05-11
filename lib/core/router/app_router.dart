@@ -16,6 +16,7 @@ import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
 import 'package:smart_scale/features/scale/presentation/pages/home_page.dart';
 import 'package:smart_scale/features/scale/presentation/pages/my_devices_page.dart';
 import 'package:smart_scale/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 import 'package:smart_scale/features/nutrition/presentation/pages/nutrition_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -116,7 +117,13 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: '/nutrition',
-                  builder: (context, state) => const NutritionPage(),
+                  builder: (context, state) => BlocProvider(
+                    create: (context) => NutritionBloc(
+                      profileBloc: profileBloc,
+                      scaleBloc: getIt<ScaleBloc>(),
+                    ),
+                    child: const NutritionPage(),
+                  ),
                 ),
               ],
             ),
