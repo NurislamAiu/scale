@@ -100,12 +100,15 @@ class _PaywallPageState extends State<PaywallPage> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(20),
+              width: 88,
+              height: 88,
               decoration: const BoxDecoration(
                 color: _cardColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome, color: _limeAccent, size: 40),
+              child: const Center(
+                child: Icon(Icons.workspace_premium_rounded, color: _limeAccent, size: 38),
+              ),
             ),
           ],
         ),
@@ -168,18 +171,18 @@ class _PaywallPageState extends State<PaywallPage> {
         Expanded(
           child: _buildPlanCard(
             index: 0,
-            title: "1 Месяц",
-            price: "499 ₽",
-            subPrice: "16 ₽ / день",
+            title: "1 Month",
+            price: "\$4.99",
+            subPrice: "\$0.16 / day",
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildPlanCard(
             index: 1,
-            title: "1 Год",
-            price: "2 990 ₽",
-            subPrice: "249 ₽ / мес",
+            title: "1 Year",
+            price: "\$29.99",
+            subPrice: "\$2.50 / mo",
             isBest: true,
           ),
         ),
