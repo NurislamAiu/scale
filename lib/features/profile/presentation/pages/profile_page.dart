@@ -7,6 +7,8 @@ import 'package:smart_scale/features/profile/domain/entities/user_profile.dart';
 import 'package:smart_scale/features/scale/domain/usecases/body_composition_calculator.dart';
 import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
 
+import '../../../subscription/presentation/pages/paywall_page.dart';
+
 const Color _bgColor = Color(0xFF141414);
 const Color _cardColor = Color(0xFF1C1C1E);
 const Color _limeAccent = Color(0xFFD4FF45);
@@ -44,6 +46,8 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 24),
                 _buildProfileHeader(context, profile),
                 const SizedBox(height: 20),
+                _buildPremiumCard(context),
+                const SizedBox(height: 20),
                 _buildQuickStats(profile),
                 const SizedBox(height: 20),
                 if (profile != null) _buildRecommendationsSection(context, profile),
@@ -57,6 +61,61 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPremiumCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const PaywallPage()));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_limeAccent, _limeAccent.withValues(alpha: 0.7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: _limeAccent.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.black, size: 24),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Разблокировать PRO",
+                    style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  Text(
+                    "Безлимитный ИИ и аналитика",
+                    style: TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.black, size: 28),
+          ],
+        ),
+      ),
     );
   }
 
@@ -433,35 +492,74 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (dContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
-          "Выход",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent,
+      builder: (bContext) => Container(
+        decoration: const BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        content: const Text(
-          "Вы уверены, что хотите удалить локальные данные профиля и выйти?",
-          style: TextStyle(color: Color(0xFFA0A0A5)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: const Text("Отмена", style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () {
-              context.pop();
-              context.read<ProfileBloc>().add(const ProfileClearRequested());
-            },
-            child: const Text(
-              "Выйти",
-              style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 32),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-        ],
+            const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 48),
+            const SizedBox(height: 24),
+            const Text(
+              "Выход из аккаунта",
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Вы уверены, что хотите выйти? Локальные данные профиля будут удалены.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: _textGrey, fontSize: 16, height: 1.4),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 56,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(bContext),
+                      child: const Text("Отмена", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(bContext);
+                        context.read<ProfileBloc>().add(const ProfileClearRequested());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                        foregroundColor: Colors.redAccent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text("Выйти", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -16,6 +16,7 @@ import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
 import 'package:smart_scale/features/scale/presentation/pages/home_page.dart';
 import 'package:smart_scale/features/scale/presentation/pages/my_devices_page.dart';
 import 'package:smart_scale/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:smart_scale/features/auth/presentation/pages/login_page.dart';
 import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 import 'package:smart_scale/features/nutrition/presentation/pages/nutrition_page.dart';
 
@@ -60,7 +61,8 @@ class AppRouter {
         
         // Если профиля нет
         if (profileState.status == ProfileStatus.missing) {
-          return '/onboarding';
+          if (state.matchedLocation == '/onboarding') return null; // Разрешаем находиться на онбординге
+          return '/login';
         }
         
         // Если профиль есть (или сохраняется) -> Пускаем в приложение
@@ -80,13 +82,17 @@ class AppRouter {
           builder: (context, state) => const _SplashPage(),
         ),
         GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
           path: '/onboarding',
           builder: (context, state) => const OnboardingPage(),
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
-            return BlocProvider(
-              create: (context) => getIt<ScaleBloc>(),
+            return BlocProvider.value(
+              value: getIt<ScaleBloc>(),
               child: MainShell(navigationShell: navigationShell),
             );
           },
