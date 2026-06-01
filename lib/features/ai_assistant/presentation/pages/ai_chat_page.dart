@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../features/subscription/presentation/pages/paywall_page.dart';
 
 const Color _bgColor = Color(0xFF141414);
@@ -17,13 +18,13 @@ class _AiChatPageState extends State<AiChatPage> {
   final TextEditingController _messageController = TextEditingController();
   int _messagesSentCount = 0;
   final int _freeLimit = 3;
-  bool _isPremium = false; // Mock status
+  final bool _isPremium = false; // Mock status
 
   late final List<Map<String, dynamic>> _messages = [
     {
       'isAi': true,
-      'text': 'Привет! Я твой персональный ИИ-ассистент Yoda Health. У тебя есть $_freeLimit бесплатных запроса. Чем могу помочь?',
-      'time': '12:00',
+      'text': 'Привет! Я твой персональный ИИ-ассистент Yoda. У тебя есть $_freeLimit бесплатных запроса. Чем могу помочь?',
+      'time': DateFormat('HH:mm').format(DateTime.now()),
     },
   ];
 
@@ -31,7 +32,7 @@ class _AiChatPageState extends State<AiChatPage> {
     if (_messageController.text.trim().isEmpty) return;
 
     if (!_isPremium && _messagesSentCount >= _freeLimit) {
-      _showPaywall();
+      _showLimitReachedSheet();
       return;
     }
     
@@ -39,7 +40,7 @@ class _AiChatPageState extends State<AiChatPage> {
       _messages.add({
         'isAi': false,
         'text': _messageController.text,
-        'time': '12:01',
+        'time': DateFormat('HH:mm').format(DateTime.now()),
       });
       _messagesSentCount++;
       _messageController.clear();
@@ -52,14 +53,14 @@ class _AiChatPageState extends State<AiChatPage> {
           _messages.add({
             'isAi': true,
             'text': 'Хороший вопрос! На основе твоего ИМТ и уровня активности, я рекомендую добавить 20 минут кардио сегодня вечером.',
-            'time': '12:01',
+            'time': DateFormat('HH:mm').format(DateTime.now()),
           });
         });
       }
     });
   }
 
-  void _showPaywall() {
+  void _showLimitReachedSheet() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -98,7 +99,7 @@ class _AiChatPageState extends State<AiChatPage> {
             ),
             const SizedBox(height: 8),
             const Text(
-              "Для продолжения общения с ИИ разблокируйте Yoda PRO",
+              "Для продолжения общения с ИИ разблокируйте Yoda PRO. Это даст вам безлимитные запросы и персональные инсайты.",
               textAlign: TextAlign.center,
               style: TextStyle(color: _textGrey, fontSize: 14, height: 1.5),
             ),
@@ -109,10 +110,7 @@ class _AiChatPageState extends State<AiChatPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const PaywallPage()),
-                  );
+                  _showPaywall();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _limeAccent,
@@ -127,6 +125,13 @@ class _AiChatPageState extends State<AiChatPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showPaywall() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PaywallPage()),
     );
   }
 

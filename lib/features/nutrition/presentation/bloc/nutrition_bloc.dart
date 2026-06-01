@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_scale/features/profile/domain/entities/user_profile.dart';
 import 'package:smart_scale/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
@@ -11,17 +13,20 @@ part 'nutrition_state.dart';
 class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
   final ProfileBloc profileBloc;
   final ScaleBloc scaleBloc;
+  final SharedPreferences prefs;
   late StreamSubscription _profileSubscription;
   late StreamSubscription _scaleSubscription;
 
   NutritionBloc({
     required this.profileBloc,
     required this.scaleBloc,
+    required this.prefs,
   }) : super(NutritionState(selectedDate: DateTime.now())) {
     on<NutritionDataUpdated>(_onDataUpdated);
     on<NutritionMealAdded>(_onMealAdded);
     on<NutritionMealDeleted>(_onMealDeleted);
     on<NutritionDateChanged>(_onDateChanged);
+    on<_NutritionInternalDataLoaded>(_onInternalDataLoaded);
 
     _profileSubscription = profileBloc.stream.listen((profileState) {
       add(NutritionDataUpdated(
@@ -37,7 +42,8 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
       ));
     });
 
-    // Initial update
+    // Initial load and update
+    _loadMeals(state.selectedDate);
     add(NutritionDataUpdated(
       profile: profileBloc.state.profile,
       currentWeight: scaleBloc.state.lastMeasurement?.weightKg,
@@ -92,10 +98,6 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
     }
 
     // Macros Calculation (Standard ratio)
-    // Protein: 2g per kg (or 30% for mass gain)
-    // Fats: 0.8g - 1g per kg (or 25%)
-    // Carbs: Remainder (or 45-50%)
-    
     int proteinTarget = (weight * 2.0).round();
     int fatTarget = (weight * 0.9).round();
     int carbsTarget = ((targetCalories - (proteinTarget * 4) - (fatTarget * 9)) / 4).round();
@@ -118,18 +120,6 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
       DateTime(now.year, now.month, now.day - 4): 0.70, // Зеленый
       DateTime(now.year, now.month, now.day - 5): 1.25, // Красный
     };
-  }
-
-  void _onDateChanged(NutritionDateChanged event, Emitter<NutritionState> emit) {
-    // В реальном приложении здесь был бы запрос к БД за данными на эту дату
-    emit(state.copyWith(
-      selectedDate: event.date,
-      consumedCalories: 0,
-      proteinConsumed: 0,
-      fatConsumed: 0,
-      carbsConsumed: 0,
-      meals: [],
-    ));
   }
 
   void _onMealAdded(NutritionMealAdded event, Emitter<NutritionState> emit) {
@@ -178,13 +168,16 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
 
     updatedMeals.add(newMeal);
 
-    emit(state.copyWith(
+    final newState = state.copyWith(
       consumedCalories: consumedCalories + event.calories,
       proteinConsumed: proteinConsumed + event.protein,
       fatConsumed: fatConsumed + event.fat,
       carbsConsumed: carbsConsumed + event.carbs,
       meals: updatedMeals,
-    ));
+    );
+    
+    emit(newState);
+    _saveMeals(state.selectedDate, updatedMeals);
   }
 
   void _onMealDeleted(NutritionMealDeleted event, Emitter<NutritionState> emit) {
@@ -193,13 +186,75 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
 
     final updatedMeals = state.meals.where((m) => m.id != event.mealId).toList();
 
-    emit(state.copyWith(
+    final newState = state.copyWith(
       consumedCalories: state.consumedCalories - mealToDelete.calories,
       proteinConsumed: state.proteinConsumed - mealToDelete.protein,
       fatConsumed: state.fatConsumed - mealToDelete.fat,
       carbsConsumed: state.carbsConsumed - mealToDelete.carbs,
       meals: updatedMeals,
+    );
+
+    emit(newState);
+    _saveMeals(state.selectedDate, updatedMeals);
+  }
+
+  void _onDateChanged(NutritionDateChanged event, Emitter<NutritionState> emit) {
+    emit(state.copyWith(selectedDate: event.date));
+    _loadMeals(event.date);
+  }
+
+  void _onInternalDataLoaded(_NutritionInternalDataLoaded event, Emitter<NutritionState> emit) {
+    emit(state.copyWith(
+      meals: event.meals,
+      consumedCalories: event.calories,
+      proteinConsumed: event.protein,
+      fatConsumed: event.fat,
+      carbsConsumed: event.carbs,
     ));
+  }
+
+  void _saveMeals(DateTime date, List<Meal> meals) {
+    final dateKey = _getDateKey(date);
+    final jsonList = meals.map((m) => m.toJson()).toList();
+    prefs.setString('nutrition_meals_$dateKey', jsonEncode(jsonList));
+  }
+
+  void _loadMeals(DateTime date) {
+    final dateKey = _getDateKey(date);
+    final jsonString = prefs.getString('nutrition_meals_$dateKey');
+    
+    List<Meal> meals = [];
+    int calories = 0;
+    int protein = 0;
+    int fat = 0;
+    int carbs = 0;
+
+    if (jsonString != null) {
+      try {
+        final List<dynamic> jsonList = jsonDecode(jsonString);
+        meals = jsonList.map((j) => Meal.fromJson(j)).toList();
+        for (var m in meals) {
+          calories += m.calories;
+          protein += m.protein;
+          fat += m.fat;
+          carbs += m.carbs;
+        }
+      } catch (e) {
+        prefs.remove('nutrition_meals_$dateKey');
+      }
+    }
+
+    add(_NutritionInternalDataLoaded(
+      meals: meals,
+      calories: calories,
+      protein: protein,
+      fat: fat,
+      carbs: carbs,
+    ));
+  }
+
+  String _getDateKey(DateTime date) {
+    return "${date.year}_${date.month}_${date.day}";
   }
 
   @override
@@ -208,4 +263,24 @@ class NutritionBloc extends Bloc<NutritionEvent, NutritionState> {
     _scaleSubscription.cancel();
     return super.close();
   }
+}
+
+// Internal event to update state after loading from storage
+class _NutritionInternalDataLoaded extends NutritionEvent {
+  final List<Meal> meals;
+  final int calories;
+  final int protein;
+  final int fat;
+  final int carbs;
+
+  const _NutritionInternalDataLoaded({
+    required this.meals,
+    required this.calories,
+    required this.protein,
+    required this.fat,
+    required this.carbs,
+  });
+
+  @override
+  List<Object?> get props => [meals, calories, protein, fat, carbs];
 }

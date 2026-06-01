@@ -1,6 +1,6 @@
-# Smart Scale
+# Yoda
 
-A custom Flutter application for Yoda1 BLE smart scales. This project uses Clean Architecture to process broadcast-only Manufacturer Data from the scales without requiring a GATT connection.
+A custom Flutter application for Yoda BLE smart scales. This project uses Clean Architecture to process broadcast-only Manufacturer Data from the scales without requiring a GATT connection.
 
 ## Features Completed
 - [x] BLE scanning for Yoda1 devices.

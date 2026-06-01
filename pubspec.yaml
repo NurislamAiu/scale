@@ -1,5 +1,5 @@
 name: smart_scale
-description: "A custom Flutter application for Yoda1 BLE smart scales."
+description: "A custom Flutter application for Yoda BLE smart scales."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -23,11 +23,22 @@ dependencies:
   timezone: ^0.11.0
   fl_chart: ^1.2.0
   intl: ^0.20.2
+  speech_to_text: ^7.0.0
+  flutter_localizations:
+    sdk: flutter
+  flutter_gen: ^5.14.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#141414"
 
 flutter:
   uses-material-design: true
+  generate: true

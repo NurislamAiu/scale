@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 
 const Color _bgColor = Color(0xFF141414);
@@ -35,7 +36,13 @@ class NutritionPage extends StatelessWidget {
                               const SizedBox(height: 24),
                               _buildHeader(state),
                               const SizedBox(height: 40),
-                              _buildCalculatorButton(context),
+                              Row(
+                                children: [
+                                  Expanded(child: _buildCalculatorButton(context)),
+                                  const SizedBox(width: 12),
+                                  _buildAiRecipeButton(context),
+                                ],
+                              ),
                               const SizedBox(height: 24),
                               _buildMacrosGrid(context, state),
                               const SizedBox(height: 32),
@@ -413,62 +420,71 @@ class NutritionPage extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showCalorieCalculator(context),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              _limeAccent,
-              _limeAccent.withOpacity(0.8),
-            ],
-          ),
+          color: _cardColor,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: _limeAccent.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.1),
+                color: _limeAccent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.calculate_rounded, color: Colors.black, size: 28),
+              child: const Icon(Icons.search_rounded, color: _limeAccent, size: 20),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Подсчет калорий",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  Text(
-                    "Добавьте продукты или блюда",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              child: Text(
+                "Поиск еды",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.black, size: 18),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAiRecipeButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showAiIngredientsCalculator(context),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_limeAccent, _limeAccent.withValues(alpha: 0.7)],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: _limeAccent.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
+        child: const Icon(Icons.auto_awesome, color: Colors.black, size: 24),
+      ),
+    );
+  }
+
+  void _showAiIngredientsCalculator(BuildContext context) {
+    final nutritionBloc = context.read<NutritionBloc>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => BlocProvider.value(
+        value: nutritionBloc,
+        child: const _AiIngredientsSheet(),
       ),
     );
   }
@@ -1005,6 +1021,386 @@ class _ProgressCalendarSheet extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(label, style: const TextStyle(color: _textGrey, fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class _AiIngredientsSheet extends StatefulWidget {
+  const _AiIngredientsSheet({super.key});
+
+  @override
+  State<_AiIngredientsSheet> createState() => _AiIngredientsSheetState();
+}
+
+class _AiIngredientsSheetState extends State<_AiIngredientsSheet> {
+  final TextEditingController _ingredientsController = TextEditingController();
+  bool _isAnalyzing = false;
+  List<Map<String, dynamic>>? _suggestions;
+  Map<String, dynamic>? _selectedResult;
+
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  String _lastWords = ''; // Store previously recognized text
+
+  @override
+  void dispose() {
+    _ingredientsController.dispose();
+    super.dispose();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (status) {
+          if (status == 'done' || status == 'notListening') {
+            setState(() => _isListening = false);
+          }
+        },
+        onError: (val) => setState(() => _isListening = false),
+      );
+      if (available) {
+        setState(() {
+          _isListening = true;
+          // Remember current text to append to it
+          _lastWords = _ingredientsController.text;
+        });
+        
+        _speech.listen(
+          onResult: (val) => setState(() {
+            // Append recognized words to the original text
+            String newText = _lastWords;
+            if (newText.isNotEmpty && val.recognizedWords.isNotEmpty) {
+              newText += " ";
+            }
+            _ingredientsController.text = newText + val.recognizedWords;
+          }),
+          localeId: 'ru_RU',
+          listenFor: const Duration(minutes: 2), // Full 2 minutes of total recording
+          pauseFor: const Duration(seconds: 20),  // Wait 20 seconds of silence!
+          cancelOnError: false,
+          partialResults: true,
+          listenMode: stt.ListenMode.dictation, // Use dictation mode for better long-form support
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  void _analyzeIngredients() async {
+    if (_ingredientsController.text.trim().isEmpty) return;
+
+    setState(() {
+      _isAnalyzing = true;
+      _suggestions = null;
+      _selectedResult = null;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        _isAnalyzing = false;
+        _suggestions = [
+          {
+            'name': 'Омлет с овощами',
+            'cal': 320,
+            'p': 18,
+            'f': 22,
+            'c': 12,
+            'desc': 'Легкий и питательный завтрак. Взбейте яйца, добавьте нарезанные овощи и обжарьте на небольшом количестве масла.',
+          },
+          {
+            'name': 'Салат с курицей',
+            'cal': 410,
+            'p': 32,
+            'f': 15,
+            'c': 28,
+            'desc': 'Сбалансированное блюдо для обеда. Нарежьте курицу и овощи, заправьте оливковым маслом или лимонным соком.',
+          },
+          {
+            'name': 'Стир-фрай из остатков',
+            'cal': 380,
+            'p': 25,
+            'f': 18,
+            'c': 35,
+            'desc': 'Быстрый способ приготовить все сразу. Обжарьте все ингредиенты на сильном огне с соевым соусом.',
+          },
+        ];
+      });
+    }
+  }
+
+  void _addMeal(MealType type) {
+    if (_selectedResult == null) return;
+
+    context.read<NutritionBloc>().add(NutritionMealAdded(
+          title: _selectedResult!['name'],
+          calories: _selectedResult!['cal'],
+          protein: _selectedResult!['p'],
+          fat: _selectedResult!['f'],
+          carbs: _selectedResult!['c'],
+          type: type,
+        ));
+
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("${_selectedResult!['name']} добавлен"),
+        backgroundColor: _limeAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: const BoxDecoration(
+        color: _bgColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(context).padding.bottom + 24),
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              if (_selectedResult != null)
+                IconButton(
+                  onPressed: () => setState(() => _selectedResult = null),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                ),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _limeAccent.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.auto_awesome, color: _limeAccent, size: 24),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  "ИИ Рецепт",
+                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, color: Colors.white),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _buildMainContent(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    if (_isAnalyzing) {
+      return const Center(child: CircularProgressIndicator(color: _limeAccent));
+    }
+
+    if (_selectedResult != null) {
+      return _buildResultView();
+    }
+
+    if (_suggestions != null) {
+      return _buildSuggestionsList();
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Перечислите ингредиенты, которые у вас есть, и ИИ предложит, что приготовить",
+            style: TextStyle(color: _textGrey, fontSize: 14),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _ingredientsController,
+            maxLines: 4,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Например: 2 яйца, 100г курицы, шпинат...",
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+              filled: true,
+              fillColor: _cardColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.all(20),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: IconButton(
+                  onPressed: _listen,
+                  icon: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                    color: _isListening ? Colors.redAccent : _limeAccent,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              onPressed: _analyzeIngredients,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _limeAccent,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              ),
+              child: const Text("РАССЧИТАТЬ ЧЕРЕЗ ИИ", style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "ИИ предлагает варианты:",
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _suggestions!.length,
+            itemBuilder: (context, index) {
+              final item = _suggestions![index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: _cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  onTap: () => setState(() => _selectedResult = item),
+                  title: Text(
+                    item['name'],
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    "${item['cal']} ккал",
+                    style: const TextStyle(color: _limeAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded, color: _textGrey, size: 16),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: () => setState(() => _suggestions = null),
+            child: const Text("Изменить ингредиенты", style: TextStyle(color: _textGrey)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultView() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Text(
+            "${_selectedResult!['cal']}",
+            style: const TextStyle(color: _limeAccent, fontSize: 64, fontWeight: FontWeight.bold),
+          ),
+          const Text("ккал в блюде", style: TextStyle(color: _textGrey, fontSize: 16)),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNutrientSmall("Белки", "${_selectedResult!['p']}г", const Color(0xFFFF7B5C)),
+              _buildNutrientSmall("Жиры", "${_selectedResult!['f']}г", const Color(0xFFFFD600)),
+              _buildNutrientSmall("Углеводы", "${_selectedResult!['c']}г", const Color(0xFF00E5FF)),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            ),
+            child: Text(
+              _selectedResult!['desc'],
+              style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+            ),
+          ),
+          const SizedBox(height: 32),
+          const Text("Добавить как:", style: TextStyle(color: _textGrey, fontSize: 14, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: _buildTypeAddButton(MealType.breakfast, "Завтрак")),
+              const SizedBox(width: 8),
+              Expanded(child: _buildTypeAddButton(MealType.lunch, "Обед")),
+              const SizedBox(width: 8),
+              Expanded(child: _buildTypeAddButton(MealType.dinner, "Ужин")),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeAddButton(MealType type, String label) {
+    return ElevatedButton(
+      onPressed: () => _addMeal(type),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _cardColor,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildNutrientSmall(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
       ],
     );
   }

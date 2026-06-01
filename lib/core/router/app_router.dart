@@ -124,10 +124,7 @@ class AppRouter {
                 GoRoute(
                   path: '/nutrition',
                   builder: (context, state) => BlocProvider(
-                    create: (context) => NutritionBloc(
-                      profileBloc: profileBloc,
-                      scaleBloc: getIt<ScaleBloc>(),
-                    ),
+                    create: (context) => getIt<NutritionBloc>(),
                     child: const NutritionPage(),
                   ),
                 ),

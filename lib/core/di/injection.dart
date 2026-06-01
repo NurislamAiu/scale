@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_scale/features/analytics/data/repositories/history_repository_impl.dart';
 import 'package:smart_scale/features/analytics/domain/repositories/history_repository.dart';
+import 'package:smart_scale/core/presentation/bloc/language_bloc.dart';
 import 'package:smart_scale/features/analytics/presentation/bloc/analytics_bloc.dart';
 import 'package:smart_scale/features/nutrition/presentation/bloc/nutrition_bloc.dart';
 import 'package:smart_scale/features/profile/data/profile_repository_impl.dart';
@@ -44,8 +45,11 @@ Future<void> setupDi() async {
   );
 
   // BLoCs
-  getIt.registerFactory<ProfileBloc>(
+  getIt.registerLazySingleton<ProfileBloc>(
     () => ProfileBloc(getIt()),
+  );
+  getIt.registerLazySingleton<LanguageBloc>(
+    () => LanguageBloc(getIt()),
   );
   getIt.registerLazySingleton<ScaleBloc>(
     () => ScaleBloc(getIt(), getIt(), getIt(), getIt()),
@@ -60,6 +64,7 @@ Future<void> setupDi() async {
     () => NutritionBloc(
       profileBloc: getIt<ProfileBloc>(),
       scaleBloc: getIt<ScaleBloc>(),
+      prefs: getIt<SharedPreferences>(),
     ),
   );
 }

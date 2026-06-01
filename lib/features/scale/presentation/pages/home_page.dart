@@ -35,21 +35,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (lastMeasurement != null) {
       context.read<ScaleBloc>().add(ScaleMeasurementSaved(lastMeasurement));
     }
-    
+
     // Анимация для пользователя
     await Future.delayed(const Duration(milliseconds: 1200));
-    
+
     HapticFeedback.heavyImpact();
-    setState(() { 
-      _isSaving = false; 
-      _isSaved = true; 
+    setState(() {
+      _isSaving = false;
+      _isSaved = true;
     });
-    
+
     // Держим анимацию успеха 2 секунды, затем прячем кнопку
     await Future.delayed(const Duration(milliseconds: 2000));
     if (mounted) {
-      setState(() { 
-        _isSaved = false; 
+      setState(() {
+        _isSaved = false;
         _hasSavedCurrentWeight = true; // Убираем кнопку с экрана
       });
     }
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           },
           builder: (context, state) {
             if (kDebugMode) print('[HomePage] Rebuilding with state: ${state.status}');
-            
+
             if (state.status == ScaleStatus.permissionDenied || state.status == ScaleStatus.error) {
               return _buildErrorState(state.errorMessage ?? "Произошла ошибка.");
             }
@@ -148,7 +148,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       child: Row(
         children: [
           const Text(
-            "Yoda Health",
+            "Yoda",
             style: TextStyle(
               color: _limeAccent,
               fontSize: 22,
@@ -302,10 +302,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         // Имитация скрытого узора датчиков (кольца)
                         Center(
                           child: Container(
-                            width: 80, 
-                            height: 80, 
+                            width: 80,
+                            height: 80,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle, 
+                              shape: BoxShape.circle,
                               border: Border.all(color: Colors.white.withOpacity(0.03), width: 1)
                             )
                           )
@@ -318,7 +318,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         Positioned(top: 14, right: 14, child: _buildElectrode()),
                         Positioned(bottom: 14, left: 14, child: _buildElectrode()),
                         Positioned(bottom: 14, right: 14, child: _buildElectrode()),
-                        
+
                         // Мини-дисплей весов (Перемещен НАВЕРХ)
                         Align(
                           alignment: Alignment.topCenter,
@@ -336,10 +336,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             ),
                             child: Center(
                               child: Text(
-                                currentWeight > 0 ? currentWeight.toStringAsFixed(2) : "0.00", 
+                                currentWeight > 0 ? currentWeight.toStringAsFixed(2) : "0.00",
                                 style: const TextStyle(
-                                  color: _limeAccent, 
-                                  fontWeight: FontWeight.w900, 
+                                  color: _limeAccent,
+                                  fontWeight: FontWeight.w900,
                                   fontSize: 14,
                                   fontFamily: 'Courier',
                                   letterSpacing: 1.0,
@@ -358,7 +358,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
               // Название устройства
               const Text(
-                "Yoda1 Smart Scale",
+                "Yoda Smart Scale",
                 style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -386,18 +386,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 children: [
                   Expanded(
                     child: _buildDeviceInfoCard(
-                      Icons.flag_rounded, 
-                      "Моя цель", 
-                      targetWeight != null ? "${targetWeight.toStringAsFixed(1)} кг" : "--", 
+                      Icons.flag_rounded,
+                      "Моя цель",
+                      targetWeight != null ? "${targetWeight.toStringAsFixed(1)} кг" : "--",
                       const Color(0xFFBF5AF2) // Фиолетовый
                     )
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildDeviceInfoCard(
-                      progressIcon, 
-                      "Прогресс", 
-                      progressValue, 
+                      progressIcon,
+                      "Прогресс",
+                      progressValue,
                       progressColor
                     )
                   ),
@@ -471,7 +471,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           Text(title, style: const TextStyle(color: Color(0xFFA0A0A5), fontSize: 12)),
           const SizedBox(height: 4),
           Text(
-            value, 
+            value,
             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -483,7 +483,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Color _getSmoothBmiColor(double bmi) {
     if (bmi <= 0) return _limeAccent;
-    
+
     if (bmi < 18.5) {
       // Плавный переход от Желтого к Салатовому на границе нормы
       double t = (bmi - 16.0) / (18.5 - 16.0);
@@ -513,7 +513,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildCircularWeightDisplay(ScaleState state) {
     final targetWeight = state.lastMeasurement?.weightKg ?? 0.0;
-    
+
     String statusText = "Встаньте на весы";
     if (state.status == ScaleStatus.weighing) {
       statusText = "Измерение...";
@@ -529,7 +529,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         // Достаем профиль из КОНТЕКСТА, а не создаем новый
         final profileBloc = context.read<ProfileBloc>();
         final heightMeters = profileBloc.state.profile?.heightMeters ?? 1.75;
-        
+
         final currentBmi = animatedWeight > 0 ? (animatedWeight / (heightMeters * heightMeters)) : 0.0;
         final dynamicColor = _getSmoothBmiColor(currentBmi);
         final progress = animatedWeight > 0 ? (animatedWeight / 120.0).clamp(0.01, 1.0) : 0.0;
@@ -695,7 +695,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) {
               return ScaleTransition(
-                scale: animation, 
+                scale: animation,
                 child: FadeTransition(opacity: animation, child: child)
               );
             },

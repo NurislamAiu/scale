@@ -98,6 +98,34 @@ class Meal extends Equatable {
     required this.type,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'calories': calories,
+      'protein': protein,
+      'fat': fat,
+      'carbs': carbs,
+      'imageUrl': imageUrl,
+      'timestamp': timestamp.toIso8601String(),
+      'type': type.name,
+    };
+  }
+
+  factory Meal.fromJson(Map<String, dynamic> json) {
+    return Meal(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      calories: json['calories'] as int,
+      protein: json['protein'] as int,
+      fat: json['fat'] as int,
+      carbs: json['carbs'] as int,
+      imageUrl: json['imageUrl'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      type: MealType.values.firstWhere((e) => e.name == json['type']),
+    );
+  }
+
   @override
   List<Object?> get props => [id, title, calories, protein, fat, carbs, imageUrl, timestamp, type];
 }

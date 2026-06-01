@@ -53,7 +53,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    "Добро пожаловать в\nYoda Health",
+                    "Добро пожаловать в\nYoda",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,

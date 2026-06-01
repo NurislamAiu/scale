@@ -2,12 +2,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_scale/core/presentation/bloc/language_bloc.dart';
 import 'package:smart_scale/features/profile/domain/usecases/fitness_advisor.dart';
 import 'package:smart_scale/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:smart_scale/features/profile/domain/entities/user_profile.dart';
 import 'package:smart_scale/features/scale/domain/usecases/body_composition_calculator.dart';
 import 'package:smart_scale/features/scale/presentation/bloc/scale_bloc.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../subscription/presentation/pages/paywall_page.dart';
 
 const Color _bgColor = Color(0xFF141414);
@@ -51,7 +53,8 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildQuickStats(profile),
                 const SizedBox(height: 20),
-                if (profile != null) _buildRecommendationsSection(context, profile),
+                if (profile != null)
+                  _buildRecommendationsSection(context, profile),
                 const SizedBox(height: 20),
                 _buildSettingsMenu(context, profile),
                 const SizedBox(height: 40),
@@ -68,7 +71,8 @@ class ProfilePage extends StatelessWidget {
   Widget _buildPremiumCard(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const PaywallPage()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const PaywallPage()));
       },
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -95,7 +99,8 @@ class ProfilePage extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome, color: Colors.black, size: 24),
+              child:
+                  const Icon(Icons.auto_awesome, color: Colors.black, size: 24),
             ),
             const SizedBox(width: 16),
             const Expanded(
@@ -104,16 +109,23 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   Text(
                     "Разблокировать PRO",
-                    style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900),
                   ),
                   Text(
                     "Безлимитный ИИ и аналитика",
-                    style: TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: Colors.black, size: 28),
+            const Icon(Icons.chevron_right_rounded,
+                color: Colors.black, size: 28),
           ],
         ),
       ),
@@ -148,7 +160,8 @@ class ProfilePage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: _cardColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: _limeAccent.withValues(alpha: 0.5), width: 2),
+                border: Border.all(
+                    color: _limeAccent.withValues(alpha: 0.5), width: 2),
               ),
               child: const Icon(
                 Icons.person_rounded,
@@ -175,7 +188,7 @@ class ProfilePage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const Text(
-          "Yoda Health",
+          "Yoda",
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -198,8 +211,8 @@ class ProfilePage extends StatelessWidget {
   Widget _buildQuickStats(UserProfile? profile) {
     final height = profile?.heightCm.toString() ?? "175";
     final age = profile?.ageYears.toString() ?? "25";
-    final target = profile?.targetWeightKg != null 
-        ? profile!.targetWeightKg!.toStringAsFixed(1) 
+    final target = profile?.targetWeightKg != null
+        ? profile!.targetWeightKg!.toStringAsFixed(1)
         : "--";
 
     return Row(
@@ -213,12 +226,15 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildRecommendationsSection(BuildContext context, UserProfile profile) {
+  Widget _buildRecommendationsSection(
+      BuildContext context, UserProfile profile) {
     return BlocBuilder<ScaleBloc, ScaleState>(
       builder: (context, scaleState) {
         final currentWeight = scaleState.lastMeasurement?.weightKg ?? 70.0;
-        final comp = BodyCompositionCalculator.calculate(weightKg: currentWeight, profile: profile);
-        final plan = FitnessAdvisor.getNutritionPlan(profile, currentWeight, comp.tdee);
+        final comp = BodyCompositionCalculator.calculate(
+            weightKg: currentWeight, profile: profile);
+        final plan =
+            FitnessAdvisor.getNutritionPlan(profile, currentWeight, comp.tdee);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,12 +243,18 @@ class ProfilePage extends StatelessWidget {
               children: [
                 const Text(
                   "Рекомендации",
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
                   _getGoalLabel(profile.fitnessGoal),
-                  style: const TextStyle(color: _limeAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      color: _limeAccent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -248,10 +270,14 @@ class ProfilePage extends StatelessWidget {
 
   String _getGoalLabel(FitnessGoal goal) {
     switch (goal) {
-      case FitnessGoal.weightLoss: return "Похудение";
-      case FitnessGoal.maintenance: return "Поддержание";
-      case FitnessGoal.massGain: return "Набор массы";
-      case FitnessGoal.aggressiveWeightLoss: return "Сушка";
+      case FitnessGoal.weightLoss:
+        return "Похудение";
+      case FitnessGoal.maintenance:
+        return "Поддержание";
+      case FitnessGoal.massGain:
+        return "Набор массы";
+      case FitnessGoal.aggressiveWeightLoss:
+        return "Сушка";
     }
   }
 
@@ -268,18 +294,32 @@ class ProfilePage extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.restaurant_rounded, color: _limeAccent, size: 20),
+              const Icon(Icons.restaurant_rounded,
+                  color: _limeAccent, size: 20),
               const SizedBox(width: 8),
-              const Text("План питания", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text("План питания",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text("${plan.calories.toInt()} ккал", style: const TextStyle(color: _limeAccent, fontSize: 18, fontWeight: FontWeight.w900)),
+              Text("${plan.calories.toInt()} ккал",
+                  style: const TextStyle(
+                      color: _limeAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900)),
             ],
           ),
           const SizedBox(height: 12),
-          Text(plan.message, style: const TextStyle(color: _textGrey, fontSize: 13)),
+          Text(plan.message,
+              style: const TextStyle(color: _textGrey, fontSize: 13)),
           if (plan.weeksToGoal != null) ...[
             const SizedBox(height: 8),
-            Text("Прогноз: цель через ${plan.weeksToGoal} недель", style: const TextStyle(color: _limeAccent, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text("Прогноз: цель через ${plan.weeksToGoal} недель",
+                style: const TextStyle(
+                    color: _limeAccent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold)),
           ],
           const SizedBox(height: 20),
           Row(
@@ -300,7 +340,9 @@ class ProfilePage extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(color: _textGrey, fontSize: 11)),
         const SizedBox(height: 4),
-        Text("${grams.toInt()}г", style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold)),
+        Text("${grams.toInt()}г",
+            style: TextStyle(
+                color: color, fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -322,31 +364,46 @@ class ProfilePage extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.fitness_center_rounded, color: Colors.blueAccent, size: 20),
+                const Icon(Icons.fitness_center_rounded,
+                    color: Colors.blueAccent, size: 20),
                 const SizedBox(width: 8),
-                const Text("Тренировочный план", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text("Тренировочный план",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold)),
                 const Spacer(),
                 GestureDetector(
                   onTap: () => _showYodaEcosystemSheet(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: _limeAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: _limeAccent.withValues(alpha: 0.4)),
+                      border:
+                          Border.all(color: _limeAccent.withValues(alpha: 0.4)),
                     ),
                     child: const Text(
                       "Подробнее",
-                      style: TextStyle(color: _limeAccent, fontSize: 12, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                          color: _limeAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(description, style: const TextStyle(color: _textGrey, fontSize: 13)),
+            Text(description,
+                style: const TextStyle(color: _textGrey, fontSize: 13)),
           ],
         ),
       ),
@@ -355,42 +412,91 @@ class ProfilePage extends StatelessWidget {
 
   void _showYodaEcosystemSheet(BuildContext context) {
     showModalBottomSheet(
+
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
       builder: (ctx) {
         return Container(
+          height: MediaQuery.of(ctx).size.height * 0.8,
           decoration: const BoxDecoration(
             color: Color(0xFF0E0E10),
             borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
           ),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(0, 16, 0, MediaQuery.of(ctx).padding.bottom + 32),
+            padding: EdgeInsets.fromLTRB(
+                0, 16, 0, MediaQuery.of(ctx).padding.bottom + 32),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Drag handle
                 Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(2)),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(2)),
                 ),
                 const SizedBox(height: 24),
 
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+// Кнопка X
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
                 // Бейдж NEW
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: _limeAccent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _limeAccent.withValues(alpha: 0.35)),
+                    border:
+                        Border.all(color: _limeAccent.withValues(alpha: 0.35)),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.bolt_rounded, color: _limeAccent, size: 14),
                       SizedBox(width: 4),
-                      Text("ТОЛЬКО ЧТО ВЫШЕЛ", style: TextStyle(color: _limeAccent, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                      Text("ТОЛЬКО ЧТО ВЫШЕЛ",
+                          style: TextStyle(
+                              color: _limeAccent,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5)),
                     ],
                   ),
                 ),
@@ -401,7 +507,11 @@ class ProfilePage extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
                     "Yoda Band",
-                    style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 40,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1.5),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -410,7 +520,10 @@ class ProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     "Первый браслет, который знает тебя лучше, чем ты сам",
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 15, height: 1.4),
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 15,
+                        height: 1.4),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -418,9 +531,10 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 36),
 
                 // SVG браслет
+
                 SizedBox(
-                  width: double.infinity,
-                  height: 200,
+                  width: 190,
+                  height: 190,
                   child: CustomPaint(painter: _YodaBandPainter()),
                 ),
 
@@ -458,7 +572,7 @@ class ProfilePage extends StatelessWidget {
                         Icons.bolt_rounded,
                         _limeAccent,
                         "ИИ-тренер на запястье",
-                        "Синхронизируется с Yoda Health и даёт персональные рекомендации в реальном времени",
+                        "Синхронизируется с Yoda и даёт персональные рекомендации в реальном времени",
                       ),
                       const SizedBox(height: 16),
                       _buildBandFeature(
@@ -481,22 +595,31 @@ class ProfilePage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.07)),
                     ),
                     child: Column(
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (_) => const Icon(Icons.star_rounded, color: _limeAccent, size: 18)),
+                          children: List.generate(
+                              5,
+                              (_) => const Icon(Icons.star_rounded,
+                                  color: _limeAccent, size: 18)),
                         ),
                         const SizedBox(height: 12),
                         const Text(
                           '"После Yoda Band я понял, почему всегда уставал на тренировках — я просто не восстанавливался"',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontStyle: FontStyle.italic, height: 1.5),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              height: 1.5),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
-                        const Text("— Алексей, 31 год · марафонец", style: TextStyle(color: _textGrey, fontSize: 12)),
+                        const Text("— Алексей, 31 год · марафонец",
+                            style: TextStyle(color: _textGrey, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -518,12 +641,17 @@ class ProfilePage extends StatelessWidget {
                             backgroundColor: _limeAccent,
                             foregroundColor: Colors.black,
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("ХОЧУ YODA BAND", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.3)),
+                              Text("ХОЧУ YODA BAND",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16,
+                                      letterSpacing: 0.3)),
                               SizedBox(width: 8),
                               Icon(Icons.arrow_forward_rounded, size: 20),
                             ],
@@ -533,7 +661,8 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: const Text("Пока не сейчас", style: TextStyle(color: _textGrey, fontSize: 13)),
+                        child: const Text("Пока не сейчас",
+                            style: TextStyle(color: _textGrey, fontSize: 13)),
                       ),
                     ],
                   ),
@@ -557,16 +686,26 @@ class ProfilePage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: const TextStyle(color: _limeAccent, fontSize: 17, fontWeight: FontWeight.w900)),
+            Text(value,
+                style: const TextStyle(
+                    color: _limeAccent,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: _textGrey, fontSize: 10, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+            Text(label,
+                style: const TextStyle(
+                    color: _textGrey,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBandFeature(IconData icon, Color color, String title, String desc) {
+  Widget _buildBandFeature(
+      IconData icon, Color color, String title, String desc) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -583,9 +722,15 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(title,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(desc, style: const TextStyle(color: _textGrey, fontSize: 13, height: 1.4)),
+              Text(desc,
+                  style: const TextStyle(
+                      color: _textGrey, fontSize: 13, height: 1.4)),
             ],
           ),
         ),
@@ -595,19 +740,27 @@ class ProfilePage extends StatelessWidget {
 
   String _getWorkoutTitle(FitnessGoal goal) {
     switch (goal) {
-      case FitnessGoal.weightLoss: return "3x Кардио + 2x Силовая (Full Body)";
-      case FitnessGoal.maintenance: return "3-4x Смешанные тренировки";
-      case FitnessGoal.massGain: return "Push / Pull / Legs (3-4 раза в неделю)";
-      case FitnessGoal.aggressiveWeightLoss: return "4x Силовая + Ежедневное кардио";
+      case FitnessGoal.weightLoss:
+        return "3x Кардио + 2x Силовая (Full Body)";
+      case FitnessGoal.maintenance:
+        return "3-4x Смешанные тренировки";
+      case FitnessGoal.massGain:
+        return "Push / Pull / Legs (3-4 раза в неделю)";
+      case FitnessGoal.aggressiveWeightLoss:
+        return "4x Силовая + Ежедневное кардио";
     }
   }
 
   String _getWorkoutDescription(FitnessGoal goal) {
     switch (goal) {
-      case FitnessGoal.weightLoss: return "Фокус на сжигание калорий и поддержание тонуса мышц. Ходьба 10к шагов ежедневно.";
-      case FitnessGoal.maintenance: return "Поддержание формы, работа над выносливостью и гибкостью.";
-      case FitnessGoal.massGain: return "Акцент на прогрессию весов в базовых упражнениях и профицит калорий.";
-      case FitnessGoal.aggressiveWeightLoss: return "Высокая интенсивность для максимального рельефа при сохранении мышц.";
+      case FitnessGoal.weightLoss:
+        return "Фокус на сжигание калорий и поддержание тонуса мышц. Ходьба 10к шагов ежедневно.";
+      case FitnessGoal.maintenance:
+        return "Поддержание формы, работа над выносливостью и гибкостью.";
+      case FitnessGoal.massGain:
+        return "Акцент на прогрессию весов в базовых упражнениях и профицит калорий.";
+      case FitnessGoal.aggressiveWeightLoss:
+        return "Высокая интенсивность для максимального рельефа при сохранении мышц.";
     }
   }
 
@@ -660,6 +813,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSettingsMenu(BuildContext context, UserProfile? profile) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: _cardColor,
@@ -674,14 +828,97 @@ class ProfilePage extends StatelessWidget {
             }
           }),
           _buildDivider(),
-          _buildMenuItem(Icons.bluetooth_connected_rounded, "Мои устройства", () => context.push('/profile/my-devices')),
+          _buildMenuItem(Icons.language_rounded, l10n.language,
+              () => _showLanguageBottomSheet(context)),
           _buildDivider(),
-          _buildMenuItem(Icons.straighten_rounded, "Единицы измерения", () => _showUnitsBottomSheet(context)),
+          _buildMenuItem(Icons.bluetooth_connected_rounded, "Мои устройства",
+              () => context.push('/profile/my-devices')),
           _buildDivider(),
-          _buildMenuItem(Icons.notifications_none_rounded, "Напоминания", () => context.push('/profile/reminders')),
+          _buildMenuItem(Icons.straighten_rounded, "Единицы измерения",
+              () => _showUnitsBottomSheet(context)),
           _buildDivider(),
-          _buildMenuItem(Icons.help_outline_rounded, "Помощь и поддержка", () => _showComingSoon(context)),
+          _buildMenuItem(Icons.notifications_none_rounded, "Напоминания",
+              () => context.push('/profile/reminders')),
+          _buildDivider(),
+          _buildMenuItem(Icons.help_outline_rounded, "Помощь и поддержка",
+              () => _showComingSoon(context)),
         ],
+      ),
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (bContext) => Container(
+        decoration: const BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(l10n.language,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            _buildLanguageOption(context, "Русский", const Locale('ru')),
+            const SizedBox(height: 12),
+            _buildLanguageOption(context, "English", const Locale('en')),
+            const SizedBox(height: 12),
+            _buildLanguageOption(context, "Қазақша", const Locale('kk')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(BuildContext context, String title, Locale locale) {
+    final isSelected = Localizations.localeOf(context).languageCode == locale.languageCode;
+
+    return GestureDetector(
+      onTap: () {
+        context.read<LanguageBloc>().add(LanguageChanged(locale));
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? _limeAccent.withValues(alpha: 0.1) : _bgColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: isSelected
+                  ? _limeAccent
+                  : Colors.white.withValues(alpha: 0.05)),
+        ),
+        child: Row(
+          children: [
+            Text(title,
+                style: TextStyle(
+                    color: isSelected ? Colors.white : _textGrey,
+                    fontSize: 16,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal)),
+            const Spacer(),
+            if (isSelected)
+              const Icon(Icons.check_circle_rounded,
+                  color: _limeAccent, size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -759,7 +996,8 @@ class ProfilePage extends StatelessWidget {
           color: _cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 48),
+        padding:
+            const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 48),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -776,7 +1014,10 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 24),
             const Text(
               "Выход из аккаунта",
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -792,7 +1033,11 @@ class ProfilePage extends StatelessWidget {
                     height: 56,
                     child: TextButton(
                       onPressed: () => Navigator.pop(bContext),
-                      child: const Text("Отмена", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text("Отмена",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
@@ -803,15 +1048,21 @@ class ProfilePage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(bContext);
-                        context.read<ProfileBloc>().add(const ProfileClearRequested());
+                        context
+                            .read<ProfileBloc>()
+                            .add(const ProfileClearRequested());
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                        backgroundColor:
+                            Colors.redAccent.withValues(alpha: 0.1),
                         foregroundColor: Colors.redAccent,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: const Text("Выйти", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text("Выйти",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
@@ -868,10 +1119,13 @@ class ProfilePage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? _limeAccent.withValues(alpha: 0.1) : const Color(0xFF141414),
+          color: isSelected
+              ? _limeAccent.withValues(alpha: 0.1)
+              : const Color(0xFF141414),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? _limeAccent : Colors.white.withValues(alpha: 0.05),
+            color:
+                isSelected ? _limeAccent : Colors.white.withValues(alpha: 0.05),
           ),
         ),
         child: Row(
@@ -902,159 +1156,182 @@ class _YodaBandPainter extends CustomPainter {
     final cx = size.width / 2;
     final cy = size.height / 2;
 
-    // --- Ремешок нижний ---
-    final strapPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [const Color(0xFF2A2A2E), const Color(0xFF1A1A1E)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(Rect.fromLTWH(cx - 28, cy + 36, 56, 60));
-    final strapTop = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx - 28, cy + 34, 56, 62),
-      const Radius.circular(12),
-    );
-    canvas.drawRRect(strapTop, strapPaint);
-
     // --- Ремешок верхний ---
-    final strapPaint2 = Paint()
-      ..shader = LinearGradient(
-        colors: [const Color(0xFF2A2A2E), const Color(0xFF1A1A1E)],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      ).createShader(Rect.fromLTWH(cx - 28, cy - 96, 56, 62));
-    final strapBottom = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx - 28, cy - 96, 56, 62),
-      const Radius.circular(12),
-    );
-    canvas.drawRRect(strapBottom, strapPaint2);
-
-    // Дырочки на ремешке
-    final holePaint = Paint()..color = const Color(0xFF0E0E10);
-    for (int i = 0; i < 3; i++) {
-      canvas.drawCircle(Offset(cx, cy + 55 + i * 16.0), 3, holePaint);
-      canvas.drawCircle(Offset(cx, cy - 71 - i * 16.0), 3, holePaint);
-    }
-
-    // --- Корпус ---
-    final bodyPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [const Color(0xFF2E2E33), const Color(0xFF1C1C20)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromLTWH(cx - 46, cy - 38, 92, 76));
-    final body = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx - 46, cy - 38, 92, 76),
-      const Radius.circular(20),
-    );
-    canvas.drawRRect(body, bodyPaint);
-
-    // Граница корпуса
-    final borderPaint = Paint()
-      ..color = const Color(0xFFD4FF45).withOpacity(0.25)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawRRect(body, borderPaint);
-
-    // --- Экран ---
-    final screenPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [const Color(0xFF0A1A0A), const Color(0xFF0D1510)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromLTWH(cx - 36, cy - 28, 72, 56));
-    final screen = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx - 36, cy - 28, 72, 56),
-      const Radius.circular(12),
-    );
-    canvas.drawRRect(screen, screenPaint);
-
-    // --- Контент экрана ---
-
-    // Пульс линия (ECG-стиль)
-    final ecgPaint = Paint()
-      ..color = const Color(0xFFD4FF45)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final ecgPath = Path();
-    ecgPath.moveTo(cx - 32, cy - 2);
-    ecgPath.lineTo(cx - 20, cy - 2);
-    ecgPath.lineTo(cx - 14, cy - 14);
-    ecgPath.lineTo(cx - 8, cy + 10);
-    ecgPath.lineTo(cx - 2, cy - 18);
-    ecgPath.lineTo(cx + 4, cy + 6);
-    ecgPath.lineTo(cx + 10, cy - 2);
-    ecgPath.lineTo(cx + 32, cy - 2);
-    canvas.drawPath(ecgPath, ecgPaint);
-
-    // HRV текст (маленький)
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        text: "HRV  82",
-        style: TextStyle(color: Color(0xFFD4FF45), fontSize: 9, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(canvas, Offset(cx - 36 + 4, cy - 26));
-
-    // Нижние метрики
-    final metricPainter = TextPainter(
-      text: const TextSpan(
-        children: [
-          TextSpan(text: "SpO₂ 98%  ", style: TextStyle(color: Color(0xFF9B8FFF), fontSize: 7.5, fontWeight: FontWeight.bold)),
-          TextSpan(text: "64 bpm", style: TextStyle(color: Color(0xFFFF5C7A), fontSize: 7.5, fontWeight: FontWeight.bold)),
-        ],
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    metricPainter.paint(canvas, Offset(cx - 36 + 4, cy + 16));
-
-    // --- Боковая кнопка ---
-    final btnPaint = Paint()
-      ..color = const Color(0xFF3A3A3E)
-      ..style = PaintingStyle.fill;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(cx + 46, cy - 10, 5, 20), const Radius.circular(3)),
-      btnPaint,
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(cx - 22, cy - 100, 44, 72), const Radius.circular(8)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFF0A0A0A),
+            const Color(0xFF1F1F1F),
+            const Color(0xFF181818),
+            const Color(0xFF1F1F1F),
+            const Color(0xFF0A0A0A),
+          ],
+          stops: const [0.0, 0.12, 0.5, 0.88, 1.0],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx - 22, cy - 100, 44, 72)),
     );
 
-    // --- Лаймовый свет снизу корпуса ---
-    final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [const Color(0xFFD4FF45).withOpacity(0.18), Colors.transparent],
-      ).createShader(Rect.fromCircle(center: Offset(cx, cy + 40), radius: 50));
-    canvas.drawCircle(Offset(cx, cy + 40), 50, glowPaint);
+    // --- Ремешок нижний ---
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(cx - 22, cy + 28, 44, 72), const Radius.circular(8)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFF0A0A0A),
+            const Color(0xFF1F1F1F),
+            const Color(0xFF181818),
+            const Color(0xFF1F1F1F),
+            const Color(0xFF0A0A0A),
+          ],
+          stops: const [0.0, 0.12, 0.5, 0.88, 1.0],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx - 22, cy + 28, 44, 72)),
+    );
 
-    // --- Тень корпуса ---
-    final shadowPaint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 16)
-      ..color = const Color(0xFFD4FF45).withOpacity(0.12);
-    canvas.drawRRect(body, shadowPaint);
-
-    // --- Орнамент ремешка (текстура) ---
-    final texturePaint = Paint()
-      ..color = Colors.white.withOpacity(0.04)
+    // --- Weave текстура ---
+    final weavePaint = Paint()
+      ..color = const Color(0xFF080808)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
-    for (double y = cy + 40; y < cy + 90; y += 8) {
-      canvas.drawLine(Offset(cx - 26, y), Offset(cx + 26, y), texturePaint);
-    }
-    for (double y = cy - 42; y > cy - 90; y -= 8) {
-      canvas.drawLine(Offset(cx - 26, y), Offset(cx + 26, y), texturePaint);
+    final weaveFill = Paint()..color = const Color(0xFF131313);
+
+    void drawWeave(double fromY, double toY) {
+      for (double row = fromY; row < toY; row += 7) {
+        for (double col = cx - 22; col < cx + 22; col += 9) {
+          final c1 = Offset(col + 4.5, row + 3.5);
+          canvas.drawOval(
+              Rect.fromCenter(center: c1, width: 6.5, height: 4.8), weaveFill);
+          canvas.drawOval(
+              Rect.fromCenter(center: c1, width: 6.5, height: 4.8), weavePaint);
+        }
+        for (double col = cx - 17.5; col < cx + 22; col += 9) {
+          final c2 = Offset(col + 4.5, row + 7);
+          canvas.drawOval(
+              Rect.fromCenter(center: c2, width: 6.5, height: 4.8), weaveFill);
+          canvas.drawOval(
+              Rect.fromCenter(center: c2, width: 6.5, height: 4.8), weavePaint);
+        }
+      }
     }
 
-    // Точки-деления по кругу (декор)
-    final dotPaint = Paint()..color = const Color(0xFFD4FF45).withOpacity(0.3);
-    for (int i = 0; i < 12; i++) {
-      final angle = (i / 12) * 2 * math.pi;
-      final r = 90.0;
-      final dx = cx + r * math.cos(angle);
-      final dy = cy + r * math.sin(angle);
-      if (dy < cy - 36 || dy > cy + 36) continue;
-      canvas.drawCircle(Offset(dx, dy), 1.5, dotPaint);
-    }
+    drawWeave(cy - 100, cy - 28);
+    drawWeave(cy + 28, cy + 100);
+
+    // --- Боковые тени ремешков ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy - 100, 12, 200),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [const Color(0xCC080808), const Color(0x00080808)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx - 22, cy - 100, 12, 200)),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(cx + 10, cy - 100, 12, 200),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [const Color(0x00080808), const Color(0xCC080808)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx + 10, cy - 100, 12, 200)),
+    );
+
+    // --- Тень корпуса ---
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(cx - 28, cy - 30, 56, 88), const Radius.circular(12)),
+      Paint()
+        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8)
+        ..color = Colors.black.withOpacity(0.5),
+    );
+
+    // --- Левая рейка ---
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(cx - 29, cy - 28, 10, 84), const Radius.circular(5)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [const Color(0xFF080808), const Color(0xFF222222)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx - 29, cy - 28, 10, 84)),
+    );
+
+    // --- Правая рейка ---
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(cx + 19, cy - 28, 10, 84), const Radius.circular(5)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [const Color(0xFF222222), const Color(0xFF080808)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx + 19, cy - 28, 10, 84)),
+    );
+
+    // --- Корпус основной ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy - 28, 44, 84),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFF141414),
+            const Color(0xFF252525),
+            const Color(0xFF202020),
+            const Color(0xFF252525),
+            const Color(0xFF141414),
+          ],
+          stops: const [0.0, 0.1, 0.5, 0.9, 1.0],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(Rect.fromLTWH(cx - 22, cy - 28, 44, 84)),
+    );
+
+    // --- Экранная часть ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy - 28, 44, 88),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [const Color(0xFF141414), const Color(0xFF111111)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ).createShader(Rect.fromLTWH(cx - 22, cy - 28, 44, 48)),
+    );
+
+    // --- Logo bar ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy + 41, 44, 15),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFF303030),
+            const Color(0xFF282828),
+            const Color(0xFF1A1A1A),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ).createShader(Rect.fromLTWH(cx - 22, cy + 21, 44, 35)),
+    );
+
+    // --- Верхний highlight ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy - 28, 44, 2),
+      Paint()..color = const Color(0xFF303030),
+    );
+
+    // --- Нижний край ---
+    canvas.drawRect(
+      Rect.fromLTWH(cx - 22, cy + 54, 44, 2),
+      Paint()..color = const Color(0xFF111111),
+    );
   }
 
   @override
