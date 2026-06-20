@@ -194,23 +194,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
-      child: Column(
-        children: goals.entries.map((e) {
-          final isSelected = _selectedGoal == e.key;
-          return ListTile(
-            onTap: () => setState(() => _selectedGoal = e.key),
-            title: Text(
-              e.value,
-              style: TextStyle(
-                color: isSelected ? _limeAccent : Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: goals.entries.map((e) {
+            final isSelected = _selectedGoal == e.key;
+            return ListTile(
+              onTap: () => setState(() => _selectedGoal = e.key),
+              title: Text(
+                e.value,
+                style: TextStyle(
+                  color: isSelected ? _limeAccent : Colors.white,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
-            ),
-            trailing: isSelected 
-                ? const Icon(Icons.check_circle_rounded, color: _limeAccent)
-                : null,
-          );
-        }).toList(),
+              trailing: isSelected 
+                  ? const Icon(Icons.check_circle_rounded, color: _limeAccent)
+                  : null,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -230,23 +235,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
-      child: Column(
-        children: activities.entries.map((e) {
-          final isSelected = _selectedActivity == e.key;
-          return ListTile(
-            onTap: () => setState(() => _selectedActivity = e.key),
-            title: Text(
-              e.value,
-              style: TextStyle(
-                color: isSelected ? _limeAccent : Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          children: activities.entries.map((e) {
+            final isSelected = _selectedActivity == e.key;
+            return ListTile(
+              onTap: () => setState(() => _selectedActivity = e.key),
+              title: Text(
+                e.value,
+                style: TextStyle(
+                  color: isSelected ? _limeAccent : Colors.white,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
-            ),
-            trailing: isSelected 
-                ? const Icon(Icons.check_circle_rounded, color: _limeAccent)
-                : null,
-          );
-        }).toList(),
+              trailing: isSelected 
+                  ? const Icon(Icons.check_circle_rounded, color: _limeAccent)
+                  : null,
+            );
+          }).toList(),
+        ),
       ),
     );
   }

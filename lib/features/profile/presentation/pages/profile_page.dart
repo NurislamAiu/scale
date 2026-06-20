@@ -241,14 +241,18 @@ class ProfilePage extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text(
-                  "Рекомендации",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
+                const Expanded(
+                  child: Text(
+                    "Рекомендации",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
                 Text(
                   _getGoalLabel(profile.fitnessGoal),
                   style: const TextStyle(
@@ -297,12 +301,18 @@ class ProfilePage extends StatelessWidget {
               const Icon(Icons.restaurant_rounded,
                   color: _limeAccent, size: 20),
               const SizedBox(width: 8),
-              const Text("План питания",
+              const Expanded(
+                child: Text(
+                  "План питания",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold)),
-              const Spacer(),
+                      fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               Text("${plan.calories.toInt()} ккал",
                   style: const TextStyle(
                       color: _limeAccent,
@@ -367,12 +377,18 @@ class ProfilePage extends StatelessWidget {
                 const Icon(Icons.fitness_center_rounded,
                     color: Colors.blueAccent, size: 20),
                 const SizedBox(width: 8),
-                const Text("Тренировочный план",
+                const Expanded(
+                  child: Text(
+                    "Тренировочный план",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                const Spacer(),
+                        fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () => _showYodaEcosystemSheet(context),
                   child: Container(

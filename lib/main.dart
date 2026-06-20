@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupDi();
   // Инициализация локали для форматирования дат на русском
-  await initializeDateFormatting('ru_RU', null); 
+  await initializeDateFormatting('ru_RU', null);
   // Инициализация сервиса уведомлений
   await getIt<NotificationService>().init();
   runApp(const MyApp());

@@ -799,62 +799,65 @@ class AnalyticsPage extends StatelessWidget {
 
           final comp = _calculateComposition(m, profile);
 
-          return ListTile(
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            title: Row(
-              children: [
-                Text(
-                  "${m.weightKg.toStringAsFixed(2)} кг",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                if (comp != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _limeAccent.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
+          return Material(
+            color: Colors.transparent,
+            child: ListTile(
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              title: Row(
+                children: [
+                  Text(
+                    "${m.weightKg.toStringAsFixed(2)} кг",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
-                    child: Text(
-                      "Жир: ${comp.bodyFatPercent.toStringAsFixed(1)}%",
-                      style: const TextStyle(color: _limeAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  if (comp != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _limeAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "Жир: ${comp.bodyFatPercent.toStringAsFixed(1)}%",
+                        style: const TextStyle(color: _limeAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              subtitle: Text(
+                DateFormat('d MMMM, HH:mm', 'ru_RU').format(m.timestamp),
+                style: const TextStyle(color: _textGrey, fontSize: 13),
+              ),
+              trailing: hasDiff
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    diffPositive
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                    color: diffPositive ? _redAccent : _greenAccent,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${diff.abs().toStringAsFixed(1)} кг",
+                    style: TextStyle(
+                      color: diffPositive ? _redAccent : _greenAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                 ],
-              ],
+              )
+                  : null,
             ),
-            subtitle: Text(
-              DateFormat('d MMMM, HH:mm', 'ru_RU').format(m.timestamp),
-              style: const TextStyle(color: _textGrey, fontSize: 13),
-            ),
-            trailing: hasDiff
-                ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  diffPositive
-                      ? Icons.arrow_upward_rounded
-                      : Icons.arrow_downward_rounded,
-                  color: diffPositive ? _redAccent : _greenAccent,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "${diff.abs().toStringAsFixed(1)} кг",
-                  style: TextStyle(
-                    color: diffPositive ? _redAccent : _greenAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            )
-                : null,
           );
         },
       ),
