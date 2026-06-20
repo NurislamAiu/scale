@@ -91,7 +91,7 @@ class LoginPage extends StatelessWidget {
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png'),
+                          image: NetworkImage('https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png'),
                           fit: BoxFit.contain,
                         ),
                       ),

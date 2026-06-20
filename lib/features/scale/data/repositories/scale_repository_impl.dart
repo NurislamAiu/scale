@@ -45,9 +45,18 @@ class ScaleRepositoryImpl implements ScaleRepository {
             statuses[Permission.bluetoothConnect] == PermissionStatus.granted;
 
         if (!hasBlePermissions) {
-          // You could be more specific here based on which permission was denied.
           return const Left(PermissionDeniedFailure());
         }
+      } else if (Platform.isIOS) {
+        // On iOS, we request Bluetooth and Location.
+        // FBP will trigger the system prompt if needed.
+        // We don't return failure immediately here based on permission_handler status
+        // because it can be unreliable on iOS if the Podfile macros are missing.
+        // Instead, we rely on FlutterBluePlus.adapterState.
+        await [
+          Permission.bluetooth,
+          Permission.location,
+        ].request();
       }
 
       // Check adapter state after ensuring permissions.
@@ -60,6 +69,10 @@ class ScaleRepositoryImpl implements ScaleRepository {
             return const Left(BluetoothOffFailure());
           }
         } else {
+          // If unauthorized, it means permissions were denied
+          if (adapterState == BluetoothAdapterState.unauthorized) {
+            return const Left(PermissionDeniedFailure());
+          }
           return const Left(BluetoothOffFailure());
         }
       }

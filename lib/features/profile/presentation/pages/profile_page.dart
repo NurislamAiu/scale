@@ -678,26 +678,37 @@ class ProfilePage extends StatelessWidget {
   Widget _buildMetricChip(String value, String label) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _limeAccent.withValues(alpha: 0.15)),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(value,
-                style: const TextStyle(
-                    color: _limeAccent,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900)),
+            Text(
+              value,
+              style: const TextStyle(
+                color: _limeAccent,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 4),
-            Text(label,
-                style: const TextStyle(
-                    color: _textGrey,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center),
+            Text(
+              label,
+              style: const TextStyle(
+                color: _textGrey,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
@@ -924,30 +935,33 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
-          borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2C2C2E),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: const Color(0xFF4A7DFF), size: 20),
         ),
-        child: Icon(icon, color: const Color(0xFF4A7DFF), size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: _textGrey,
+          size: 24,
+        ),
+        onTap: onTap,
       ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: _textGrey,
-        size: 24,
-      ),
-      onTap: onTap,
     );
   }
 

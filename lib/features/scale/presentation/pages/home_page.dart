@@ -72,9 +72,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (kDebugMode) print('[HomePage] App resumed. Restarting BLE scan.');
-      // Когда приложение возвращается из фона, пинаем BLoC, чтобы он перезапустил сканирование
-      context.read<ScaleBloc>().add(const ScaleStarted());
+      final scaleBloc = context.read<ScaleBloc>();
+      // Restart scan only if we are not in an error/denied state,
+      // or if it was previously working. This prevents loops when permissions are denied.
+      if (scaleBloc.state.status != ScaleStatus.permissionDenied &&
+          scaleBloc.state.status != ScaleStatus.error) {
+        if (kDebugMode) print('[HomePage] App resumed. Restarting BLE scan.');
+        scaleBloc.add(const ScaleStarted());
+      }
     }
   }
 
