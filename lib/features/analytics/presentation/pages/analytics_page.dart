@@ -58,17 +58,32 @@ class AnalyticsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: _bgColor,
         elevation: 0,
-        title: const Text(
-          "Аналитика",
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Аналитика",
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+            ),
+            SizedBox(height: 2),
+            Text(
+              "Тренды и состав тела",
+              style: TextStyle(color: _textGrey, fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
         centerTitle: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: _textGrey),
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: _cardColor,
+              foregroundColor: _limeAccent,
+            ),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () =>
                 context.read<AnalyticsBloc>().add(const AnalyticsLoadRequested()),
           ),
+          const SizedBox(width: 12),
         ],
       ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
@@ -165,7 +180,8 @@ class AnalyticsPage extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: _cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Row(
         children: [
@@ -193,15 +209,15 @@ class AnalyticsPage extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2C2C2E) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            color: isSelected ? _limeAccent : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Center(
             child: Text(
               title,
               style: TextStyle(
-                color: isSelected ? Colors.white : _textGrey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? Colors.black : _textGrey,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
               ),
             ),
           ),
@@ -278,66 +294,83 @@ class AnalyticsPage extends StatelessWidget {
         ? Icons.arrow_upward_rounded
         : Icons.trending_flat_rounded);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Вес за период",
-              style: TextStyle(
-                color: _textGrey,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Вес за период",
+                style: TextStyle(
+                  color: _textGrey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    latestWeight.toStringAsFixed(1),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 42,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    "кг",
+                    style: TextStyle(
+                      color: _textGrey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                "${data.length} измерений",
+                style: const TextStyle(
+                  color: _textGrey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          if (data.length > 1)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: diffColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Icon(diffIcon, color: diffColor, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${diff.abs().toStringAsFixed(1)} кг",
+                    style: TextStyle(color: diffColor, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  latestWeight.toStringAsFixed(1),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Text(
-                  "кг",
-                  style: TextStyle(
-                    color: _textGrey,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        if (data.length > 1)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: diffColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                Icon(diffIcon, color: diffColor, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  "${diff.abs().toStringAsFixed(1)} кг",
-                  style: TextStyle(color: diffColor, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -390,7 +423,15 @@ class AnalyticsPage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 24, 24, 12),
       decoration: BoxDecoration(
         color: _cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: LineChart(
         LineChartData(
@@ -511,7 +552,8 @@ class AnalyticsPage extends StatelessWidget {
       height: 250,
       decoration: BoxDecoration(
         color: _cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Center(
         child: Padding(
